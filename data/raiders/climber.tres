@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="RaiderType" format=3]
+
+[ext_resource type="Script" path="res://data/raider_type.gd" id="1_hndn2"]
+
+[resource]
+script = ExtResource("1_hndn2")
+id = "climber"
+display_name = "Climber"
+budget_cost = 2
+unlock_wave = 2
+speed = 2.4
+climbs_walls = true
+knockback_resist = 0.8
+mass = 0.9
+gold = 5
+colour = Color(0.72156864, 0.6313726, 0.23529412, 1)
+height = 0.8
+radius = 0.18

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="RaiderType" format=3]
+
+[ext_resource type="Script" path="res://data/raider_type.gd" id="1_d1tdc"]
+
+[resource]
+script = ExtResource("1_d1tdc")
+id = "jarl"
+display_name = "Jarl"
+budget_cost = 20
+unlock_wave = 12
+speed = 1.0
+footing_deg = 12.0
+knockback_resist = 4.0
+mass = 10.0
+keep_damage = 10
+gold = 100
+colour = Color(0.76862746, 0.3254902, 0.22745098, 1)
+height = 1.25
+radius = 0.32

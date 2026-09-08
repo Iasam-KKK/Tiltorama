@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="RollerType" format=3]
+
+[ext_resource type="Script" path="res://data/roller_type.gd" id="1_splitter"]
+
+[resource]
+script = ExtResource("1_splitter")
+id = "splitter"
+display_name = "Splitter"
+description = "Breaks into three on the first thing it hits. This is where a cascade starts."
+radius = 0.22
+mass = 1.2
+friction = 0.35
+restitution = 0.3
+knockback = 1.0
+on_impact = "split"
+on_impact_params = {
+"burst": 1.8,
+"child": "stone",
+"count": 3,
+"mass_scale": 0.4
+}
+cost = 16
+draft_weight = 2.0
+colour = Color(0.8784314, 0.2509804, 0.49803922, 1)

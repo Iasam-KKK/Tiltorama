@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="RollerType" format=3]
+
+[ext_resource type="Script" path="res://data/roller_type.gd" id="1_stone"]
+
+[resource]
+script = ExtResource("1_stone")
+id = "stone"
+display_name = "Stone"
+description = "The default cut. Cheap, and the only roller you will ever have enough of."
+radius = 0.22
+mass = 1.0
+friction = 0.35
+restitution = 0.3
+knockback = 1.0
+cost = 4
+draft_weight = 6.0
+colour = Color(0.24313726, 0.5254902, 0.8509804, 1)

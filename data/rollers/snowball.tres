@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="RollerType" format=3]
+
+[ext_resource type="Script" path="res://data/roller_type.gd" id="1_snowball"]
+
+[resource]
+script = ExtResource("1_snowball")
+id = "snowball"
+display_name = "Snowball"
+description = "Grows with every metre it rolls, and leaves a handful of stones where it stops."
+radius = 0.18
+mass = 0.5
+friction = 0.35
+restitution = 0.3
+knockback = 1.0
+grows = true
+grow_per_metre = 0.3
+grow_max_mass = 4.0
+on_stop = "shatter"
+on_stop_params = {
+"burst": 1.0,
+"child": "stone",
+"count": 4,
+"mass_scale": 0.25
+}
+cost = 26
+draft_weight = 0.5
+colour = Color(0.91764706, 0.95686275, 1.0, 1)

@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="RaiderType" format=3]
+
+[ext_resource type="Script" path="res://data/raider_type.gd" id="1_1m3gu"]
+
+[resource]
+script = ExtResource("1_1m3gu")
+id = "anchor"
+display_name = "Anchor-man"
+budget_cost = 3
+unlock_wave = 5
+speed = 1.2
+footing_deg = 99.0
+never_slips = true
+knockback_resist = 1.5
+mass = 1.4
+gold = 8
+colour = Color(0.47843137, 0.2901961, 0.22745098, 1)
+height = 0.88
+radius = 0.22

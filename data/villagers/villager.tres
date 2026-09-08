@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="VillagerType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/villager_type.gd" id="1_vill"]
+
+[resource]
+script = ExtResource("1_vill")

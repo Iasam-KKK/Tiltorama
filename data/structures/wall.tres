@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="StructureType" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/castle/wall.glb" id="1_adwul"]
+[ext_resource type="Script" path="res://data/structure_type.gd" id="2_qego6"]
+
+[resource]
+script = ExtResource("2_qego6")
+footprint = Vector3(1, 1.3, 1)
+model = ExtResource("1_adwul")
+description = "Blocks raiders and stops sliding marbles."

@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="RaiderType" format=3]
+
+[ext_resource type="Script" path="res://data/raider_type.gd" id="1_11gdj"]
+
+[resource]
+script = ExtResource("1_11gdj")
+id = "shieldwall"
+display_name = "Shieldwall"
+budget_cost = 3
+unlock_wave = 3
+speed = 1.1
+knockback_resist = 2.0
+mass = 1.6
+gold = 8
+colour = Color(0.3529412, 0.39215687, 0.44705883, 1)
+height = 0.9
+radius = 0.24

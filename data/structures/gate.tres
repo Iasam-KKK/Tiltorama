@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="StructureType" format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/castle/wall-narrow-gate.glb" id="1_gdr18"]
+[ext_resource type="Script" path="res://data/structure_type.gd" id="2_4vmvf"]
+
+[resource]
+script = ExtResource("2_4vmvf")
+id = "gate"
+display_name = "Gate"
+kind = 2
+cost = 15
+footprint = Vector3(0.7, 1.3, 1)
+colour = Color(0.41960785, 0.37254903, 0.29803923, 1)
+model = ExtResource("1_gdr18")
+description = "Holds a stockpile until you open it. Turns a tilt into a shot."

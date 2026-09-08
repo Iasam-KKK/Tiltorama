@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="RollerType" format=3]
+
+[ext_resource type="Script" path="res://data/roller_type.gd" id="1_iron"]
+
+[resource]
+script = ExtResource("1_iron")
+id = "iron"
+display_name = "Iron"
+description = "Slow to start and hard to stop. Hits like three stones, and shieldwalls go over."
+radius = 0.22
+mass = 3.0
+friction = 0.35
+restitution = 0.3
+knockback = 3.0
+cost = 22
+draft_weight = 1.0
+colour = Color(0.8784314, 0.3882353, 0.16470589, 1)
