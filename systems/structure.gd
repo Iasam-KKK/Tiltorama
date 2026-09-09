@@ -105,11 +105,15 @@ func configure(structure_type: StructureType) -> void:
         bouncy.bounce = type.bounce
         bouncy.friction = 0.2
         physics_material_override = bouncy
+    elif type.surface_friction >= 0.0:
+        var slick := PhysicsMaterial.new()
+        slick.friction = type.surface_friction
+        slick.bounce = 0.05
+        physics_material_override = slick
 
     if type.kind == StructureType.Kind.RIM_SPIKES:
         _build_hazard()
 
-    # A ramp is a slab tipped along its own length; rollers pick up speed down it.
     rotation = node_rotation(type)
 
 
@@ -131,6 +135,8 @@ static func pieces_for(type_res: StructureType) -> Array[Transform3D]:
             return _half_pipe_pieces(type_res)
         StructureType.Kind.RIM_SPIKES:
             return _spike_pieces(type_res)
+        StructureType.Kind.RAMP:
+            return _ramp_pieces(type_res)
     var size := type_res.footprint
     out.append(_piece(size, Basis.IDENTITY, Vector3(0.0, size.y * 0.5, 0.0)))
     return out
@@ -147,8 +153,10 @@ static func piece_pose(xf: Transform3D) -> Transform3D:
 ## The tilt configure() puts on the NODE rather than on a slab. Static so the ghost
 ## can strike the same pose without instancing a structure.
 static func node_rotation(type_res: StructureType) -> Vector3:
-    if type_res != null and type_res.kind == StructureType.Kind.RAMP:
-        return Vector3(-atan2(type_res.drop, maxf(type_res.footprint.z, 0.01)), 0.0, 0.0)
+    # Nothing tilts the node any more. The ramp used to: the whole slab was rotated
+    # about the node origin, which swung its low END up into the air and left a face
+    # a third of a metre tall for a 0.22 m marble to run into. The slope now lives in
+    # the piece itself -- see _ramp_pieces -- so the leading edge is at zero.
     return Vector3.ZERO
 
 
@@ -183,6 +191,25 @@ static func _funnel_pieces(t: StructureType) -> Array[Transform3D]:
 ## An arc of slabs, each rolled inward about its own tangent. The bank is what lets
 ## a roller keep its speed through the turn: a vertical wall spends the momentum on
 ## the impact, a leaning one redirects it.
+## One slab, tilted along its own length and sunk so the TOP FACE of its low end
+## sits exactly on the tray. That is the whole fix: a roller meets the surface at
+## zero height and rolls on, instead of meeting the slab's end grain and stopping.
+## The underside runs below the tray and is buried in the 0.6 m slab.
+static func _ramp_pieces(t: StructureType) -> Array[Transform3D]:
+    var f := t.footprint
+    var run := maxf(f.z, 0.01)
+    var rise := maxf(t.drop, 0.0)
+    var theta := atan2(rise, run)
+    # The slab is longer than the footprint by exactly the slope's hypotenuse, so the
+    # ramp still occupies `run` metres of tray once it is tilted.
+    var slope_len := sqrt(run * run + rise * rise)
+    var thick := maxf(f.y, 0.05)
+    # Top face low corner at y = 0; the high end then lands at exactly `rise`.
+    var y := rise * 0.5 - thick * 0.5 * cos(theta)
+    return [_piece(Vector3(f.x, thick, slope_len),
+        Basis.from_euler(Vector3(theta, 0.0, 0.0)), Vector3(0.0, y, 0.0))]
+
+
 static func _half_pipe_pieces(t: StructureType) -> Array[Transform3D]:
     var f := t.footprint
     var segments := clampi(t.arc_segments, 1, 16)

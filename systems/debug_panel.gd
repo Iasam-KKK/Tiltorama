@@ -16,6 +16,8 @@ class_name DebugPanel
 ## Only for the cascade readout: Economy scores the chain, the audio director counts
 ## contacts for pitch. Two different numbers, so the panel shows both.
 @export var economy: Economy
+## Hidden until F1. The rig is for tuning, not for playing over.
+@export var start_hidden := false
 @export var options: Options
 @export var juice: Juice
 
@@ -78,6 +80,7 @@ func _ready() -> void:
     add_child(_root)
     _build_panel()
     _build_gauge()
+    _root.visible = not start_hidden
     # Options reads its file in its own _ready. If that lands after this panel is
     # built, the volume slider would sit on the default instead of the saved value.
     await get_tree().process_frame

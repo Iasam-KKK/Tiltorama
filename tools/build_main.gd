@@ -99,35 +99,42 @@ const PLANTING := [
 ## shadow map is not free.
 const SHADOW_MODELS := ["tree-large"]
 
-## --- ground -----------------------------------------------------------------
-## Mid-tones for the tray, all within a few per cent of TRAY_COLOUR's value and
-## none of them saturated: dry grass, shade, bare earth. The rule the art
-## direction rests on is that ROLLERS ARE THE ONLY SATURATED THINGS ON THE TRAY,
-## so variation here is a change of hue, never of intensity.
-const PATCH_TONES := [Color("77805f"), Color("64735f"), Color("6c6553")]
-## x, z, size x, size z, yaw, which tone. Every one is inside the rim by more than
-## its own half diagonal, so no patch hangs over the edge.
-const PATCHES := [
-    [-2.60, -1.40, 2.4, 1.8, 0.40, 0],
-    [1.90, -3.20, 2.8, 2.2, 1.90, 1],
-    [3.60, 1.50, 2.2, 1.6, 0.80, 0],
-    [-1.20, 3.40, 2.6, 2.0, 2.60, 2],
-    [-4.30, 1.10, 1.8, 1.4, 1.20, 1],
-    [4.00, -1.80, 1.6, 2.0, 0.20, 2],
-    [0.40, 4.20, 2.0, 1.4, 1.50, 0],
-    [-3.40, -4.30, 1.5, 1.2, 3.00, 2],
-    [2.90, 4.30, 1.4, 1.1, 0.90, 1],
-    [-4.30, -1.90, 1.2, 2.0, 2.20, 0],
-    [4.40, 3.60, 1.3, 1.3, 0.50, 2],
-    [-2.20, -4.40, 1.9, 1.0, 1.70, 1],
-    [1.30, 1.90, 1.5, 1.2, 2.90, 2],
-    [-4.30, 4.20, 1.7, 1.5, 0.60, 0],
+## --- terrain ----------------------------------------------------------------
+## The tray used to be a flat slab with coloured quads laid on top, 12 mm proud.
+## They shimmered -- not enough depth separation at 32 m -- and they were a lie: a
+## painted patch is not ground. These are real relief instead: mounds a roller gains
+## speed coming off, and hollows it gains speed dropping into, so the same marks
+## that used to be decoration now do something.
+##
+## x, z, radius, height. Height is the rise of a mound or the depth of a hollow.
+## Nothing comes within a metre of a rim -- the perimeter has to stay flat for the
+## rims to seat -- or within two metres of the roller spawn in the north-west.
+const MOUNDS := [
+    [-2.60, -1.40, 1.80, 0.46],
+    [3.60, 1.50, 1.70, 0.40],
+    [-1.20, 3.40, 1.90, 0.50],
+    [4.00, -1.80, 1.55, 0.36],
+    [-4.00, 4.00, 1.50, 0.42],
 ]
-## How proud of the floor a patch sits, and how far of that is buried. A 12 mm lip
-## with the underside inside the slab: no two faces share a plane, so nothing
-## z-fights, and nothing is tall enough to hide behind.
-const PATCH_THICK := 0.02
-const PATCH_SINK := 0.008
+const HOLLOWS := [
+    [1.90, -3.20, 1.95, 0.40],
+    [-4.30, 1.10, 1.55, 0.34],
+    [2.90, 4.30, 1.70, 0.36],
+    [-1.60, -4.40, 1.45, 0.30],
+    [4.20, 3.40, 1.30, 0.28],
+]
+## Grid step for the surface mesh and its collider. 0.375 puts 32 quads across the
+## tray, about 2000 triangles -- nothing for a static trimesh, and fine enough that
+## a 1.3 m feature is seven cells wide rather than a pyramid.
+const TERRAIN_STEP := 0.375
+## The deepest a hollow may cut. The tray box collider drops below this so it can
+## never poke up through the floor of one, and stays there as a floor of last resort.
+const TERRAIN_FLOOR := -0.65
+## Ground tone. The rule the art direction rests on is that ROLLERS ARE THE ONLY
+## SATURATED THINGS ON THE TRAY, so height shifts hue and never intensity: a mound
+## is drier, a hollow holds damp earth.
+const TONE_HIGH := Color("77805f")
+const TONE_LOW := Color("6c6553")
 
 const MODELS := "res://assets/models/castle/%s.glb"
 
@@ -144,8 +151,13 @@ var _raider_ids := ["grunt", "climber", "shieldwall", "anchor", "jarl"]
 ## only the starting kit, handing the rest out as draft cards -- so the live
 ## palette the HUD numbers is a growing subset of this, not this. Adding an id
 ## here makes it draftable without touching Loadout.
-var _palette_ids := ["wall", "gate", "ramp", "bumper", "quarry", "house",
-    "funnel", "half_pipe", "rim_spikes", "return_chute", "keep_upgrade"]
+## Four tools, and every one of them answers the same question: where do the rollers
+## go? The quarry makes them, the gate holds them, the ramp speeds them up and the
+## half-pipe turns them. Wall, house, funnel, bumper, rim spikes, return chute and
+## keep upgrade all still exist in data/structures/ and can come back a line at a
+## time -- they were cut because they were shipped without a single test between
+## them and two of the five newest were broken on arrival.
+var _palette_ids := ["quarry", "gate", "ramp", "half_pipe"]
 var _roller_ids := ["stone", "iron", "bouncy", "splitter", "snowball", "sticky"]
 
 
@@ -164,7 +176,9 @@ func _init() -> void:
     cam.name = "Camera3D"
     cam.fov = 25.0
     cam.near = 0.5
-    cam.far = 300.0
+    # 300 m of depth range for a 12 m tray spends precision on nothing, and
+    # thin ground detail pays for it. The island and its islets end inside 140.
+    cam.far = 140.0
     cam.position = Vector3(0.0, CAM_DIST * sin(deg_to_rad(-CAM_PITCH)), CAM_DIST * cos(deg_to_rad(-CAM_PITCH)))
     cam.rotation_degrees = Vector3(CAM_PITCH, 0.0, 0.0)
     cam.attributes = _camera_attributes()
@@ -264,6 +278,10 @@ func _init() -> void:
     debug.name = "DebugPanel"
     debug.layer = 2
     debug.set_script(load("res://systems/debug_panel.gd"))
+    # Off until F1. It is a tuning rig, not part of the game, and it was sitting on
+    # top of the wave counter -- so every screenshot showed two readouts smeared
+    # together and nobody could read either.
+    debug.set("start_hidden", true)
     root.add_child(debug)
 
     # Layer 3: the draft sits over both the HUD (1) and the debug panel (2).
@@ -332,6 +350,7 @@ func _init() -> void:
     director.set("types", raider_types)
     director.set("tray_half", TRAY_HALF)
 
+    economy.set("villager_pool", villager_pool)
     run.set("table", table)
     run.set("wave_director", director)
     run.set("raider_pool", raider_pool)
@@ -506,10 +525,10 @@ func _camera_attributes() -> CameraAttributesPractical:
     attrs.dof_blur_near_distance = CAM_DIST - 4.5
     attrs.dof_blur_near_transition = 4.0
     attrs.dof_blur_far_enabled = true
-    attrs.dof_blur_far_distance = CAM_DIST + 4.5
-    attrs.dof_blur_far_transition = 6.0
+    attrs.dof_blur_far_distance = CAM_DIST + 12.0
+    attrs.dof_blur_far_transition = 12.0
     # Subtle. A diorama is soft at the edges, not out of focus.
-    attrs.dof_blur_amount = 0.12
+    attrs.dof_blur_amount = 0.07
     return attrs
 
 
@@ -550,7 +569,19 @@ func _tray() -> StaticBody3D:
     var floor_mat := _flat(TRAY_COLOUR)
     var rim_mat := _flat(RIM_COLOUR)
 
-    _slab(tray, "Floor", Vector3(TRAY, THICK, TRAY), Vector3(0.0, -THICK * 0.5, 0.0), floor_mat)
+    # The visible top and everything a roller runs on. The old flat "Floor" slab is
+    # gone: it would have rendered straight across the mouth of every hollow.
+    _terrain(tray, floor_mat)
+    # A plain box under the terrain, its top below the deepest hollow. It is
+    # invisible and nothing normally touches it -- it is there so a body that finds
+    # a seam in the trimesh lands on something instead of leaving the world.
+    var base := BoxShape3D.new()
+    base.size = Vector3(TRAY, THICK, TRAY)
+    var base_col := CollisionShape3D.new()
+    base_col.name = "BaseShape"
+    base_col.shape = base
+    base_col.position = Vector3(0.0, TERRAIN_FLOOR - THICK * 0.5, 0.0)
+    tray.add_child(base_col)
 
     var half := TRAY * 0.5 - RIM_T * 0.5
     var y := RIM_H * 0.5
@@ -619,27 +650,6 @@ func _scenery(parent: Node3D) -> void:
         var islet: Array = ISLETS[i]
         _taper(scenery, "Islet%d" % i, float(islet[3]), float(islet[3]) * 0.35,
             float(islet[4]), Vector3(float(islet[0]), float(islet[1]), float(islet[2])), rock)
-
-    # Ground tone. A change of hue at the tray's own value, never of intensity --
-    # rollers are the only saturated things out here and that is what makes them
-    # readable from 32 m.
-    var tones: Array[StandardMaterial3D] = []
-    for tone in PATCH_TONES:
-        tones.append(_flat(tone))
-    for i in PATCHES.size():
-        var patch: Array = PATCHES[i]
-        var mesh := BoxMesh.new()
-        mesh.size = Vector3(float(patch[2]), PATCH_THICK, float(patch[3]))
-        var mi := MeshInstance3D.new()
-        mi.name = "Patch%d" % i
-        mi.mesh = mesh
-        mi.material_override = tones[int(patch[5])]
-        # Proud by a hair, underside buried in the slab, so no two faces share a
-        # plane and nothing z-fights as the world leans.
-        mi.position = Vector3(float(patch[0]), PATCH_THICK * 0.5 - PATCH_SINK, float(patch[1]))
-        mi.rotation.y = float(patch[4])
-        mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
-        scenery.add_child(mi)
 
     for i in PLANTING.size():
         var entry: Array = PLANTING[i]
@@ -719,6 +729,118 @@ func _no_shadow(node: Node) -> void:
         mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     for child in node.get_children():
         _no_shadow(child)
+
+
+## Height of the ground at a point. Every feature falls off as (1 - (d/r)^2)^2, which
+## reaches zero WITH zero slope at its own radius -- so features blend into the flat
+## tray, and into each other, leaving no lip anywhere for a roller to catch on.
+static func _ground_height(x: float, z: float) -> float:
+    var h := 0.0
+    for m in MOUNDS:
+        h += _bump(x, z, m)
+    for c in HOLLOWS:
+        h -= _bump(x, z, c)
+    return h
+
+
+static func _bump(x: float, z: float, f: Array) -> float:
+    var dx: float = x - float(f[0])
+    var dz: float = z - float(f[1])
+    var r: float = maxf(float(f[2]), 0.01)
+    var t := 1.0 - (dx * dx + dz * dz) / (r * r)
+    if t <= 0.0:
+        return 0.0
+    return float(f[3]) * t * t
+
+
+## The tray top: a heightfield mesh, a trimesh collider cut from the same triangles
+## so what you see is what a roller rides, and a skirt down the outside so the slab
+## still reads as a slab from the side.
+func _terrain(tray: StaticBody3D, mat: StandardMaterial3D) -> void:
+    var half := TRAY * 0.5
+    var cells := int(round(TRAY / TERRAIN_STEP))
+    var step := TRAY / float(cells)
+
+    var st := SurfaceTool.new()
+    st.begin(Mesh.PRIMITIVE_TRIANGLES)
+    var tris := PackedVector3Array()
+
+    for ix in cells:
+        for iz in cells:
+            var x0 := -half + float(ix) * step
+            var x1 := x0 + step
+            var z0 := -half + float(iz) * step
+            var z1 := z0 + step
+            var a := Vector3(x0, _ground_height(x0, z0), z0)
+            var b := Vector3(x1, _ground_height(x1, z0), z0)
+            var c := Vector3(x1, _ground_height(x1, z1), z1)
+            var d := Vector3(x0, _ground_height(x0, z1), z1)
+            _ground_tri(st, tris, a, b, c)
+            _ground_tri(st, tris, a, c, d)
+
+    # The perimeter is flat by construction, so a straight wall down to the
+    # underside closes the slab without the old box needing to show its sides.
+    var low := -THICK
+    for i in cells:
+        var t0 := -half + float(i) * step
+        var t1 := t0 + step
+        _skirt(st, tris, Vector3(t0, 0.0, -half), Vector3(t1, 0.0, -half), low, Vector3(0, 0, -1))
+        _skirt(st, tris, Vector3(t1, 0.0, half), Vector3(t0, 0.0, half), low, Vector3(0, 0, 1))
+        _skirt(st, tris, Vector3(-half, 0.0, t1), Vector3(-half, 0.0, t0), low, Vector3(-1, 0, 0))
+        _skirt(st, tris, Vector3(half, 0.0, t0), Vector3(half, 0.0, t1), low, Vector3(1, 0, 0))
+
+    var mi := MeshInstance3D.new()
+    mi.name = "Terrain"
+    mi.mesh = st.commit()
+    # Flat tray colour. Tone-by-height went in as vertex colours and never arrived
+    # in the mesh, which left albedo showing through white -- the relief is carried
+    # by the lighting on the slopes, which is what actually reads at 32 m anyway.
+    mi.material_override = mat
+    tray.add_child(mi)
+
+    var shape := ConcavePolygonShape3D.new()
+    shape.set_faces(tris)
+    var col := CollisionShape3D.new()
+    col.name = "TerrainShape"
+    col.shape = shape
+    tray.add_child(col)
+
+
+func _ground_tri(st: SurfaceTool, tris: PackedVector3Array, a: Vector3, b: Vector3, c: Vector3) -> void:
+    var n := (b - a).cross(c - a)
+    if n.length() < 0.000001:
+        return
+    n = n.normalized()
+    if n.y < 0.0:
+        n = -n
+    for v in [a, b, c]:
+        st.set_normal(n)
+        st.set_color(_tone(v.y))
+        st.add_vertex(v)
+    tris.append(a)
+    tris.append(b)
+    tris.append(c)
+
+
+func _skirt(st: SurfaceTool, tris: PackedVector3Array, a: Vector3, b: Vector3,
+        low: float, outward: Vector3) -> void:
+    var a2 := Vector3(a.x, low, a.z)
+    var b2 := Vector3(b.x, low, b.z)
+    for tri in [[a, a2, b2], [a, b2, b]]:
+        for v in tri:
+            st.set_normal(outward)
+            st.set_color(_tone(0.0))
+            st.add_vertex(v)
+        tris.append(tri[0])
+        tris.append(tri[1])
+        tris.append(tri[2])
+
+
+## Hue by height, at the tray own value -- never intensity, see the note above.
+static func _tone(y: float) -> Color:
+    if y >= 0.0:
+        return TRAY_COLOUR.lerp(TONE_HIGH, clampf(y / 0.50, 0.0, 1.0) * 0.75)
+    return TRAY_COLOUR.lerp(TONE_LOW, clampf(-y / 0.40, 0.0, 1.0) * 0.75)
 
 
 func _slab(parent: Node3D, slab_name: String, size: Vector3, at: Vector3, mat: StandardMaterial3D) -> void:

@@ -67,6 +67,7 @@ var _main: Node
 var _run_state: RunState
 var _economy: Economy
 var _keep: Keep
+var _rollers: RollerPool
 var _raiders: RaiderPool
 var _villagers: VillagerPool
 var _tilt: TiltController
@@ -239,6 +240,7 @@ func _live() -> void:
     _nav = _main.get_node("World/NavRegion")
     _structures = _main.get_node("World/NavRegion/Structures")
     _kill = _main.get_node("World/KillVolume")
+    _rollers = _main.get_node("World/RollerPool")
     _raiders = _main.get_node("World/RaiderPool")
     _villagers = _main.get_node("World/VillagerPool")
     _max_tilt = _tilt.max_tilt_deg
@@ -276,6 +278,9 @@ func _live() -> void:
     await _draft_opens_and_closes()
     await _routes_around_a_wall()
     await _sealed_keep_is_breached()
+    _ramp_has_no_step()
+    await _terrain_gives_momentum()
+    await _sticky_does_not_glue_to_the_ground()
 
 
 ## Raiders arrive over a rim, not out of the middle of the tray. Sampled every frame
@@ -613,6 +618,123 @@ func _roller_palette() -> void:
     _check("no two roller types share a brightness", lums.size() == ids.size() and worst >= 0.10,
         "closest pair %.3f apart (%.3f vs %.3f); the bar is 0.10"
             % [worst, lums[worst_pair], lums[worst_pair + 1]])
+
+
+## The ramp used to be a slab rotated about the node origin, which swung its low END
+## into the air: a marble 0.22 m across met a face about 0.29 m tall and stopped
+## dead. This is a geometry assertion rather than a physics one because it pins the
+## exact thing that was wrong -- the low end of the running surface has to be ON the
+## tray, and the high end has to be a full drop above it.
+func _ramp_has_no_step() -> void:
+    var ramp: StructureType = load("res://data/structures/ramp.tres")
+    var pieces := Structure.pieces_for(ramp)
+    if not _check("the ramp is one slab", pieces.size() == 1, "%d pieces" % pieces.size()):
+        return
+    var xf: Transform3D = pieces[0]
+    var size := Structure.piece_size(xf)
+    var pose := Structure.piece_pose(xf)
+    # The four corners of the slab top face, in the structure local frame.
+    var lo := INF
+    var hi := -INF
+    for sx in [-0.5, 0.5]:
+        for sz in [-0.5, 0.5]:
+            var corner: Vector3 = pose * Vector3(size.x * sx, size.y * 0.5, size.z * sz)
+            lo = minf(lo, corner.y)
+            hi = maxf(hi, corner.y)
+    _check("the ramp meets the tray at zero height", absf(lo) <= 0.03,
+        "lowest point of the running surface is %.3f m; a 0.22 m marble cannot climb a step" % lo)
+    _check("and rises by its full drop", absf(hi - ramp.drop) <= 0.03,
+        "rises %.3f m against a drop of %.3f" % [hi, ramp.drop])
+
+
+## The terrain has to DO something, not merely look like it does. A roller let go on
+## a mound crown must turn that height into speed. The flat-ground roller beside it
+## is the control: without it this check would pass on any tray that happened to be
+## sloped, including a bug.
+func _terrain_gives_momentum() -> void:
+    _raiders.clear_all()
+    _rollers.clear()
+    # The seal check leaves a ring of walls standing around the keep. A roller let
+    # go inside it hits a wall within a metre, which is correct behaviour and a
+    # useless measurement.
+    _clear_structures()
+    _level_the_tray()
+
+    # Crown of the mound at (-1.20, 3.40), which rises 0.30 m.
+    var hill := _drop_roller("stone", Vector3(-1.20, 0.56, 3.40))
+    # Flat ground, clear of every mound and hollow.
+    var flat := _drop_roller("stone", Vector3(-2.00, 0.26, 1.60))
+    if not _check("two rollers drop for the terrain check", hill != null and flat != null):
+        return
+
+    var hill_top := 0.0
+    var flat_top := 0.0
+    var deadline := _sim + 6.0
+    while _sim < deadline and not _over_budget():
+        hill_top = maxf(hill_top, Vector2(hill.linear_velocity.x, hill.linear_velocity.z).length())
+        flat_top = maxf(flat_top, Vector2(flat.linear_velocity.x, flat.linear_velocity.z).length())
+        await process_frame
+
+    _check("a roller gains speed coming off a mound", hill_top > 0.9,
+        "reached %.2f m/s with the tray level" % hill_top)
+    _check("and flat ground gives it nothing", flat_top < 0.4,
+        "the control roller reached %.2f m/s" % flat_top)
+
+
+## on_impact fired on ANY contact above the speed gate, and the tray is a contact --
+## so a sticky roller glued itself to the floor the moment it landed and never
+## reached a raider. An effect means "it hit something", never "it arrived".
+func _sticky_does_not_glue_to_the_ground() -> void:
+    _rollers.clear()
+    _level_the_tray()
+    var sticky := _drop_roller("sticky", Vector3(-2.00, 0.60, 1.60))
+    if not _check("a sticky roller drops", sticky != null):
+        return
+
+    var landed := await _until(func() -> bool:
+        return sticky.global_position.y < 0.30, 4.0)
+    _check("the sticky roller reaches the ground", landed,
+        "y %.2f" % sticky.global_position.y)
+    _check("landing on the tray does not stick it", not _rollers.is_stuck(sticky),
+        "stuck=%s after touchdown" % str(_rollers.is_stuck(sticky)))
+
+    # And it still travels when the world leans, which a stuck body cannot do.
+    var from := sticky.global_position
+    _lean(Vector2(_max_tilt, 0.0))
+    var moved := await _until(func() -> bool:
+        return sticky.global_position.distance_to(from) > 0.8, 6.0)
+    _check("and it still rolls when the world leans", moved,
+        "travelled %.2f m" % sticky.global_position.distance_to(from))
+    _level_the_tray()
+
+
+func _level_the_tray() -> void:
+    _tilt.set_physics_process(false)
+    _tilt.set("tilt", Vector2.ZERO)
+    _tilt.call("_apply")
+
+
+func _lean(degrees: Vector2) -> void:
+    _tilt.set_physics_process(false)
+    _tilt.set("tilt", degrees)
+    _tilt.call("_apply")
+
+
+## Spawns one roller of a named type at a point and hands back the body, by diffing
+## the pool active set -- spawn_typed returns a count, not the thing it made.
+func _drop_roller(type_id: String, at: Vector3) -> RigidBody3D:
+    var before := {}
+    for child in _rollers.get_children():
+        var b := child as RigidBody3D
+        if b != null and _rollers.is_active(b):
+            before[b.get_instance_id()] = true
+    var type: RollerType = load("res://data/rollers/%s.tres" % type_id)
+    _rollers.spawn_typed(at, 1, 0.0, type)
+    for child in _rollers.get_children():
+        var b := child as RigidBody3D
+        if b != null and _rollers.is_active(b) and not before.has(b.get_instance_id()):
+            return b
+    return null
 
 
 func _check(label: String, ok: bool, detail := "") -> bool:

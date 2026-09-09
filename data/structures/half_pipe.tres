@@ -17,3 +17,4 @@ arc_radius = 1.6
 arc_deg = 90.0
 arc_segments = 6
 bank_deg = 32.0
+surface_friction = 0.04

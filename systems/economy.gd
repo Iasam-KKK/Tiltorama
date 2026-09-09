@@ -8,6 +8,9 @@ class_name Economy
 signal gold_changed(gold: int)
 signal wave_paid(kill_gold: int, bonus: int, factors: Array)
 
+## Typed Node, not VillagerPool: villager_pool.gd exports a RunState and run_state.gd
+## exports an Economy, so naming the class here would close a parse-time cycle.
+@export var villager_pool: Node
 @export var starting_gold := 140
 ## A wave cleared inside this many seconds earns the speed factor.
 @export var fast_wave_seconds := 60.0
@@ -144,6 +147,15 @@ func credit_income(amount: int) -> void:
 
 ## Pays out and returns the factor list so the HUD can show what was earned and
 ## what was missed.
+func _villager_factor() -> Dictionary:
+    var beds := 0
+    if villager_pool and villager_pool.has_method(&"capacity"):
+        beds = int(villager_pool.call(&"capacity"))
+    if beds <= 0:
+        return {"name": "no villager lost", "won": false, "pending": true}
+    return {"name": "no villager lost", "won": villagers_lost == 0}
+
+
 func settle_wave(lost_total: int) -> Array:
     _running = false
     rollers_lost = maxi(0, lost_total - _lost_at_start)
@@ -158,7 +170,10 @@ func settle_wave(lost_total: int) -> Array:
         {"name": "no keep damage", "won": keep_damage == 0},
         {"name": "rollers recovered", "won": recovered >= recovery_target},
         {"name": "cascade", "won": longest_chain >= cascade_target},
-        {"name": "no villager lost", "won": villagers_lost == 0},
+        # Pending, not won, when there is nobody to lose. Houses are out of the
+        # build palette for now, so a kingdom with no beds would otherwise collect
+        # a fifth of the bonus every wave for keeping zero villagers alive.
+        _villager_factor(),
     ]
 
     var won := 0

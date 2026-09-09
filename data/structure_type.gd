@@ -68,6 +68,11 @@ enum Kind {
 @export_group("Kind specific")
 ## QUARRY: rollers minted at the start of each wave.
 @export var mint_per_wave := 4
+## Friction of the surface a roller runs on, where the kind cares. Negative leaves
+## the roller's own material to decide, which is right for a wall. A ramp and a
+## half-pipe both exist to give speed back, and default friction scrubs it off --
+## a banked turn that costs you the speed you took into it is just a wall.
+@export var surface_friction := -1.0
 ## BUMPER: restitution of its surface.
 @export var bounce := 0.95
 ## RAMP: how far it falls across its own length.

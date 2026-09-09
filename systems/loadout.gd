@@ -36,7 +36,7 @@ const TILT_CEILING_DEG := 30.0
 ## listed here that nobody has built yet simply matches nothing. An id list that
 ## matches nothing at all falls back to the whole palette rather than leaving the
 ## player unable to build.
-@export var starting_structure_ids: Array[String] = ["wall", "gate", "quarry", "house"]
+@export var starting_structure_ids: Array[String] = ["quarry", "gate", "ramp", "half_pipe"]
 ## Roller types minted from wave 1. Empty is the correct value until roller cards
 ## exist: the pool goes on minting its default sphere.
 @export var starting_roller_types: Array[Resource] = []

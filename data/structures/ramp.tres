@@ -10,5 +10,6 @@ kind = 1
 footprint = Vector3(1.4, 0.3, 2.2)
 colour = Color(0.49803922, 0.45882353, 0.4, 1)
 description = "Accelerates rollers."
-drop = 0.7
+drop = 0.45
 max_hp = 40
+surface_friction = 0.08

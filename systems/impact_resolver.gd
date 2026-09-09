@@ -109,14 +109,31 @@ func _physics_process(_dt: float) -> void:
 
 # --- intake ---------------------------------------------------------------
 
-func _on_roller_impact(roller: RigidBody3D, _other: Node, type: RollerType, _speed: float, lateral: float, momentum: float) -> void:
+func _on_roller_impact(roller: RigidBody3D, other: Node, type: RollerType, _speed: float, lateral: float, momentum: float) -> void:
     if roller_pool == null or type == null or type.on_impact == RollerType.EFFECT_NONE:
+        return
+    # The tray is a contact like any other, so without this a sticky roller glues
+    # itself to the floor the moment it lands and a splitter splits on touchdown.
+    # An on-impact effect means "it hit SOMETHING", never "it arrived".
+    if not _is_effect_target(other):
         return
     if lateral < min_impact_speed or momentum < min_impact_momentum:
         return
     if not roller_pool.is_active(roller) or roller_pool.age_of(roller) < arm_seconds:
         return
     _enqueue(roller, false, momentum)
+
+
+## What counts as being hit: another roller, a raider, a villager, or something the
+## player built. The tray, its rims and the scenery are the world, not a target.
+func _is_effect_target(other: Node) -> bool:
+    if other is RigidBody3D:
+        return true
+    if other is Structure:
+        return true
+    # Named rather than typed: villager.gd exports a RunState and run_state.gd
+    # exports a RollerPool, so naming Villager here would close a parse-time cycle.
+    return other is Raider or other.is_class("CharacterBody3D")
 
 
 func _on_roller_stopped(roller: RigidBody3D, type: RollerType) -> void:
