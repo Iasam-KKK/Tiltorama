@@ -110,18 +110,18 @@ const SHADOW_MODELS := ["tree-large"]
 ## Nothing comes within a metre of a rim -- the perimeter has to stay flat for the
 ## rims to seat -- or within two metres of the roller spawn in the north-west.
 const MOUNDS := [
-    [-2.60, -1.40, 1.80, 0.46],
-    [3.60, 1.50, 1.70, 0.40],
-    [-1.20, 3.40, 1.90, 0.50],
-    [4.00, -1.80, 1.55, 0.36],
-    [-4.00, 4.00, 1.50, 0.42],
+    [-2.60, -1.40, 1.90, 0.34],
+    [3.60, 1.50, 1.80, 0.30],
+    [-1.20, 3.40, 2.00, 0.36],
+    [4.00, -1.80, 1.65, 0.28],
+    [-4.00, 4.00, 1.60, 0.32],
 ]
 const HOLLOWS := [
-    [1.90, -3.20, 1.95, 0.40],
-    [-4.30, 1.10, 1.55, 0.34],
-    [2.90, 4.30, 1.70, 0.36],
-    [-1.60, -4.40, 1.45, 0.30],
-    [4.20, 3.40, 1.30, 0.28],
+    [1.90, -3.20, 2.05, 0.22],
+    [-4.30, 1.10, 1.65, 0.18],
+    [2.90, 4.30, 1.80, 0.20],
+    [-1.60, -4.40, 1.55, 0.16],
+    [4.20, 3.40, 1.40, 0.16],
 ]
 ## Grid step for the surface mesh and its collider. 0.375 puts 32 quads across the
 ## tray, about 2000 triangles -- nothing for a static trimesh, and fine enough that
@@ -839,8 +839,8 @@ func _skirt(st: SurfaceTool, tris: PackedVector3Array, a: Vector3, b: Vector3,
 ## Hue by height, at the tray own value -- never intensity, see the note above.
 static func _tone(y: float) -> Color:
     if y >= 0.0:
-        return TRAY_COLOUR.lerp(TONE_HIGH, clampf(y / 0.50, 0.0, 1.0) * 0.75)
-    return TRAY_COLOUR.lerp(TONE_LOW, clampf(-y / 0.40, 0.0, 1.0) * 0.75)
+        return TRAY_COLOUR.lerp(TONE_HIGH, clampf(y / 0.36, 0.0, 1.0) * 0.75)
+    return TRAY_COLOUR.lerp(TONE_LOW, clampf(-y / 0.22, 0.0, 1.0) * 0.75)
 
 
 func _slab(parent: Node3D, slab_name: String, size: Vector3, at: Vector3, mat: StandardMaterial3D) -> void:
