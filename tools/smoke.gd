@@ -304,7 +304,11 @@ func _wave_spawns() -> void:
     var seen := {}
     var spawned := 0
     var nearest := INF
-    var deadline := _sim + 30.0
+    # 50 s, not the 30 that was tuned against a flat tray. Mounds and hollows make
+    # the crossing genuinely longer -- the raider still arrives, it just walks
+    # further. Generous enough not to be flaky, tight enough that a raider actually
+    # stuck against a wall still fails this.
+    var deadline := _sim + 50.0
     while not _spawning_done and _sim < deadline and not _over_budget():
         for child in _raiders.get_children():
             var r := child as Raider
