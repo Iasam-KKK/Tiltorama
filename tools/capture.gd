@@ -108,6 +108,8 @@ func _build_one_of_everything() -> void:
         s.position = structures.to_local(spots[i])
         structures.add_child(s)
         s.configure(type)
+        # A different heading each, so one look says whether turning works.
+        s.rotation.y = deg_to_rad(45.0 * float(i))
         s.reset_physics_interpolation()
         if rollers:
             # Uphill of each piece, so they run onto it rather than sit on it.

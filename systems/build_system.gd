@@ -19,6 +19,8 @@ signal structures_changed()
 ## Why the ghost is the colour it is, in words, for the HUD. Empty means "green,
 ## nothing to say".
 signal placement_hint_changed(text: String)
+## The angle the next piece will be laid at, in radians.
+signal rotation_changed(yaw: float)
 
 ## OPEN: raiders can still walk in. BREAKABLE: the kingdom is sealed, but something
 ## in the ring has hit points. SOLID: sealed by things nothing can break.
@@ -41,6 +43,10 @@ enum Seal { OPEN, BREAKABLE, SOLID }
 ## opened a slot for it. Under this it would be standing inside the keep's own
 ## walls, which the overlap test cannot catch: the keep is not a Structure.
 @export var keep_gate_inner := 1.1
+## How far one press of build_rotate turns the piece. 45 gives eight headings, which
+## is enough to aim a ramp or a half-pipe at anything on the tray without making the
+## overlap test guess. 90 keeps everything square; 15 is for fine work.
+@export_range(15.0, 90.0, 15.0) var rotation_step_deg := 45.0
 
 @export_group("Ghost")
 @export var ghost_ok := Color(0.3, 0.8, 0.5, 0.45)
@@ -62,6 +68,9 @@ enum Seal { OPEN, BREAKABLE, SOLID }
 
 var selected := 0
 var active := false
+## Kept across placements on purpose: laying a row of ramps at one angle should not
+## mean re-aiming for every one.
+var yaw := 0.0
 ## Set every frame the ghost is up: why the placement is refused, or what is odd
 ## about it. Empty when there is nothing to say.
 var placement_hint := ""
@@ -117,8 +126,30 @@ func cycle(step: int) -> void:
     palette_changed.emit(selected)
 
 
+## Turns the piece about its own centre. Shift goes back the other way.
+func turn(steps: int) -> void:
+    yaw = fposmod(yaw + float(steps) * deg_to_rad(rotation_step_deg), TAU)
+    rotation_changed.emit(yaw)
+
+
+## Half-extents of a footprint bounding box once it has been turned. Exact at right
+## angles and conservative in between, so a piece laid on the diagonal claims a
+## little more room than it strictly needs -- that refuses a few legal placements
+## and never permits an illegal one, which is the safe direction to be wrong in.
+static func turned_extent(footprint: Vector3, angle: float) -> Vector2:
+    var c := absf(cos(angle))
+    var n := absf(sin(angle))
+    return Vector2(footprint.x * 0.5 * c + footprint.z * 0.5 * n,
+        footprint.x * 0.5 * n + footprint.z * 0.5 * c)
+
+
 func _unhandled_input(event: InputEvent) -> void:
     if not active:
+        return
+    # Before the key branch below, which swallows every other press.
+    if event.is_action_pressed(&"build_rotate"):
+        turn(-1 if Input.is_key_pressed(KEY_SHIFT) else 1)
+        get_viewport().set_input_as_handled()
         return
     var key := event as InputEventKey
     if key and key.pressed and not key.echo:
@@ -177,7 +208,7 @@ func _process(_dt: float) -> void:
 
     _rebuild_ghost(type)
     _ghost_root.position = _spot
-    _ghost_root.rotation = Structure.node_rotation(type)
+    _ghost_root.rotation = Structure.node_rotation(type) + Vector3(0.0, yaw, 0.0)
     _ghost_material.albedo_color = colour
     _ghost_root.visible = true
 
@@ -225,6 +256,8 @@ func _place() -> void:
     s.position = structures_root.to_local(_spot)
     structures_root.add_child(s)
     s.configure(type)
+    # After configure: it assigns the whole rotation vector from node_rotation().
+    s.rotation.y = yaw
     # configure() tilts a ramp and offsets the meshes and shapes it just added, all
     # of it after the node is already in the tree, so the interpolation history
     # has to be refreshed once more. Recursive, which is what covers the children.
@@ -277,8 +310,9 @@ func _is_placeable(at: Vector3, type: StructureType) -> bool:
 func _placement_problem(at: Vector3, type: StructureType) -> String:
     if type == null:
         return "nothing selected"
-    var half_x := type.footprint.x * 0.5
-    var half_z := type.footprint.z * 0.5
+    var half := turned_extent(type.footprint, yaw)
+    var half_x := half.x
+    var half_z := half.y
     if absf(at.x) + half_x > tray_half or absf(at.z) + half_z > tray_half:
         return "off the tray"
 
@@ -306,8 +340,11 @@ func _placement_problem(at: Vector3, type: StructureType) -> String:
                 continue
             var gap_x := absf(at.x - other.global_position.x)
             var gap_z := absf(at.z - other.global_position.z)
-            if gap_x < half_x + other.type.footprint.x * 0.5 - 0.01 \
-                    and gap_z < half_z + other.type.footprint.z * 0.5 - 0.01:
+            # The other piece has an angle of its own, so its extent has to be taken
+            # at that angle -- comparing a turned ghost against square neighbours is
+            # how two ramps end up inside one another.
+            var mine := turned_extent(other.type.footprint, other.rotation.y)
+            if gap_x < half_x + mine.x - 0.01 and gap_z < half_z + mine.y - 0.01:
                 return "overlaps the %s" % other.type.display_name.to_lower()
 
     # The only placement the game refuses on grounds of strategy, and it refuses it
@@ -385,9 +422,9 @@ func _compute_seal(at: Vector3, type: StructureType) -> int:
         var s := child as Structure
         if s == null or s.type == null or not s.type.solid or not s.is_alive():
             continue
-        _stamp(s.global_position, s.type.footprint, 1 if s.is_destructible() else 2)
+        _stamp(s.global_position, s.type.footprint, s.rotation.y, 1 if s.is_destructible() else 2)
     if type.solid:
-        _stamp(at, type.footprint, 1 if type.max_hp > 0 else 2)
+        _stamp(at, type.footprint, yaw, 1 if type.max_hp > 0 else 2)
 
     if _rim_reaches_keep(1):
         return Seal.OPEN
@@ -397,12 +434,13 @@ func _compute_seal(at: Vector3, type: StructureType) -> int:
 
 
 ## Marks every cell a footprint covers, grown by the agent radius on all sides.
-func _stamp(centre: Vector3, footprint: Vector3, value: int) -> void:
+func _stamp(centre: Vector3, footprint: Vector3, angle: float, value: int) -> void:
     var pad := seal_agent_radius
-    var min_x := _cell(centre.x - footprint.x * 0.5 - pad)
-    var max_x := _cell(centre.x + footprint.x * 0.5 + pad)
-    var min_z := _cell(centre.z - footprint.z * 0.5 - pad)
-    var max_z := _cell(centre.z + footprint.z * 0.5 + pad)
+    var half := turned_extent(footprint, angle)
+    var min_x := _cell(centre.x - half.x - pad)
+    var max_x := _cell(centre.x + half.x + pad)
+    var min_z := _cell(centre.z - half.y - pad)
+    var max_z := _cell(centre.z + half.y + pad)
     for iz in range(min_z, max_z + 1):
         var row := iz * _seal_side
         for ix in range(min_x, max_x + 1):

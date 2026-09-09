@@ -105,6 +105,7 @@ func _ready() -> void:
         keep.hp_changed.connect(_refresh_now.unbind(2))
     if build_system:
         build_system.palette_changed.connect(_refresh_now.unbind(1))
+        build_system.rotation_changed.connect(_refresh_now.unbind(1))
         build_system.structures_changed.connect(_refresh_now)
 
 
@@ -189,7 +190,8 @@ func _palette_text() -> String:
         var t: StructureType = build_system.palette[i]
         var mark := ">" if i == build_system.selected else " "
         parts.append("%s%d %s %dg" % [mark, i + 1, t.display_name, t.cost])
-    return "build:  " + "   ".join(parts) + "     (click to place, Enter calls the wave)"
+    return "build:  " + "   ".join(parts) + "     (click to place, R turns %d deg, Enter calls the wave)" \
+        % int(round(rad_to_deg(build_system.yaw)))
 
 
 func _banner_text() -> String:

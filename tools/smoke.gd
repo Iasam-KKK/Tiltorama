@@ -128,6 +128,7 @@ func _run() -> void:
     _budget_curve()
     _boss_wave()
     _roller_palette()
+    _rotation_reaches_the_rules()
     await _live()
     _report()
 
@@ -739,6 +740,22 @@ func _drop_roller(type_id: String, at: Vector3) -> RigidBody3D:
         if b != null and _rollers.is_active(b) and not before.has(b.get_instance_id()):
             return b
     return null
+
+
+## Turning a piece has to reach the RULES, not just the mesh. A ramp is 1.4 across by
+## 2.2 long: laid on its side its extents have to swap, or the overlap test judges
+## every piece as though it still pointed north and two crossed ramps grow into one
+## another. This fails if rotation is cosmetic.
+func _rotation_reaches_the_rules() -> void:
+    var ramp: StructureType = load("res://data/structures/ramp.tres")
+    var square := BuildSystem.turned_extent(ramp.footprint, 0.0)
+    var quarter := BuildSystem.turned_extent(ramp.footprint, PI * 0.5)
+    _check("a turned footprint swaps its extents",
+        absf(square.x - quarter.y) < 0.001 and absf(square.y - quarter.x) < 0.001,
+        "%.2f x %.2f becomes %.2f x %.2f" % [square.x, square.y, quarter.x, quarter.y])
+    var diagonal := BuildSystem.turned_extent(ramp.footprint, PI * 0.25)
+    _check("and claims more room on the diagonal", diagonal.x > square.x + 0.1,
+        "%.2f across against %.2f square on" % [diagonal.x, square.x])
 
 
 func _check(label: String, ok: bool, detail := "") -> bool:
