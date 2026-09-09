@@ -7,4 +7,5 @@
 script = ExtResource("2_qego6")
 footprint = Vector3(1, 1.3, 1)
 model = ExtResource("1_adwul")
-description = "Blocks raiders and stops sliding marbles."
+description = "Blocks raiders and stops sliding marbles. Raiders with nowhere left to walk break it down."
+max_hp = 60

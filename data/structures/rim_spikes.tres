@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="StructureType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/structure_type.gd" id="1_spikes"]
+
+[resource]
+script = ExtResource("1_spikes")
+id = "rim_spikes"
+display_name = "Rim Spikes"
+kind = 8
+cost = 40
+base_value = 2
+footprint = Vector3(2, 0.35, 0.4)
+colour = Color(0.47843137, 0.23529412, 0.24705882, 1)
+description = "Kills whatever is knocked into it. Your people too -- they wander, and the spikes do not know them."
+solid = false
+wall_thickness = 0.14
+hazard_margin = 0.25

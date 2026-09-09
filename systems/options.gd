@@ -20,9 +20,12 @@ const MASTER_VOLUME := &"master_volume"
 const MUTED := &"muted"
 const UNLOCK_ALL := &"unlock_all"
 
-## Bumped when the file's shape changes. A file from a shape we do not know is
-## ignored rather than half-applied.
-const SAVE_VERSION := 1
+## Bumped when the file's shape changes, or when a new default has to beat what an
+## older file says: a file from a version we do not know is ignored rather than
+## half-applied. Version 2 is the SFX going quiet. Every file written before it
+## carries muted:false, and loading one would have turned the sound straight back
+## on at startup -- which is the whole thing this round was asked to stop.
+const SAVE_VERSION := 2
 
 @export var tilt_controller: TiltController
 @export var save_path := "user://tilt_options.json"
@@ -37,7 +40,13 @@ const SAVE_VERSION := 1
 @export var default_lock_camera := false
 @export var default_reduce_motion := false
 @export_range(0.0, 1.0, 0.01) var default_master_volume := 0.8
-@export var default_muted := false
+## THE GAME SHIPS SILENT, and this is the single switch that does it. Ben asked for
+## the SFX off "for now", so they are off rather than gone: muting the Master bus
+## silences every voice at the one place both this node and AudioDirector agree is
+## the player's, and F4 (or the mute box on the debug panel) lifts it again for as
+## long as the player wants it. Nothing else mutes anything at startup -- the
+## director keeps its own SFX bus unmuted and fully loaded.
+@export var default_muted := true
 ## The design promises the whole kingdom can be seen without grinding for it.
 ## Nothing reads this yet; it is in the save file from the first build so honouring
 ## the promise later is not a migration.

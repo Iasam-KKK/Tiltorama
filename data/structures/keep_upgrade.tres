@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="StructureType" load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/models/castle/tower-square.glb" id="1_annex"]
+[ext_resource type="Script" path="res://data/structure_type.gd" id="2_annex"]
+
+[resource]
+script = ExtResource("2_annex")
+id = "keep_upgrade"
+display_name = "Keep Upgrade"
+kind = 10
+cost = 70
+base_value = 2
+footprint = Vector3(1, 2, 1)
+colour = Color(0.5882353, 0.5568628, 0.49803922, 1)
+model = ExtResource("1_annex")
+description = "A bastion bolted onto the keep. Raiders have to break it before they reach the core, and it opens a gate slot inside the walls."
+max_hp = 240
+damage_lean_deg = 3.0
+keep_annex_band = Vector2(1.1, 2.2)
+gate_slots = 1

@@ -17,6 +17,9 @@ class_name DraftUI
 @export_range(1, 5, 1) var max_cards := 3
 @export var card_size := Vector2(258.0, 230.0)
 @export var accent := Color("6fa8e8")
+## The colour chip on a card that has one. Big enough to read the hue against the
+## card ground, small enough that it does not become the card.
+@export var swatch_size := Vector2(18.0, 18.0)
 
 const KIND_COLOURS := {
     "ROLLER": Color("6fa8e8"),
@@ -32,6 +35,7 @@ var _skip: Button
 var _hint: Label
 var _panels: Array[PanelContainer] = []
 var _index_labels: Array[Label] = []
+var _swatches: Array[ColorRect] = []
 var _kind_labels: Array[Label] = []
 var _title_labels: Array[Label] = []
 var _body_labels: Array[Label] = []
@@ -143,6 +147,17 @@ func _make_card(index: int) -> void:
     head.add_child(number)
     _index_labels.append(number)
 
+    # The colour this card will be wearing on the tray, next to the key that takes
+    # it. A roller is told from its neighbours by hue alone, so without this the
+    # player picks a name and has to guess which marbles it became.
+    var swatch := ColorRect.new()
+    swatch.custom_minimum_size = swatch_size
+    swatch.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+    swatch.mouse_filter = Control.MOUSE_FILTER_IGNORE
+    swatch.visible = false
+    head.add_child(swatch)
+    _swatches.append(swatch)
+
     var kind := Label.new()
     kind.add_theme_font_size_override("font_size", 11)
     kind.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
@@ -227,6 +242,13 @@ func _fill(index: int, card: Variant) -> void:
         return
     var c: Dictionary = card
     var tag := String(c.get("tag", ""))
+    var raw: Variant = c.get("swatch", Color(0.0, 0.0, 0.0, 0.0))
+    var tint: Color = raw if raw is Color else Color(0.0, 0.0, 0.0, 0.0)
+    # Zero alpha is the card saying "nothing on the tray carries my colour" -- a
+    # structure is read by its shape -- so the chip goes away rather than being
+    # drawn see-through. Anything that does have a colour is shown at full opacity.
+    _swatches[index].visible = tint.a > 0.0
+    _swatches[index].color = Color(tint.r, tint.g, tint.b, 1.0)
     _kind_labels[index].text = tag
     _kind_labels[index].modulate = KIND_COLOURS.get(tag, Color(0.7, 0.7, 0.7))
     _index_labels[index].modulate = KIND_COLOURS.get(tag, accent)

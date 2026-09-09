@@ -403,12 +403,43 @@ func _roller_card(type: Resource) -> Dictionary:
         "id": "roller:%s" % loadout.res_string(type, "id", title),
         "title": title,
         "tag": KIND_TAGS[Kind.ROLLER],
-        "body": "%s\n\nThe quarries mint it alongside what they already cut." % body,
+        "body": "%s\n\n%s" % [body, _roller_delivery()],
         "counters": loadout.tags_for_roller(type),
+        # The hue this type will be wearing on the tray. One roller is told apart
+        # from the thirty already rolling by its colour and nothing else, so the
+        # card has to carry that colour or the player has no way to connect the
+        # pick to whatever turns up. DraftUI hides the swatch at zero alpha.
+        "swatch": _swatch(type),
         "payload": type,
         "weight": 1.0,
         "why": "",
     }
+
+
+## What taking this card actually does, in the player's terms. Read off the loadout
+## rather than written out as a fixed sentence, so a designer who turns the sample
+## pour down to zero is not left with a card promising stones that never arrive.
+func _roller_delivery() -> String:
+    var sample := loadout.roller_card_sample if loadout else 0
+    if sample <= 0:
+        return "The quarries mint it alongside what they already cut."
+    return "%d roll out onto the tray now, and the quarries mint it alongside what they already cut." % sample
+
+
+## Duck-typed, because a roller card carries a plain Resource rather than a
+## RollerType -- the pool is scanned from a directory and its class may not be the
+## one this script names. A type with no colour gets a transparent swatch, which is
+## the "nothing on the tray marks this card" signal, not a see-through square.
+func _swatch(type: Resource) -> Color:
+    if type == null:
+        return Color(0.0, 0.0, 0.0, 0.0)
+    var v: Variant = type.get("colour")
+    if not (v is Color):
+        return Color(0.0, 0.0, 0.0, 0.0)
+    # Through a typed local rather than returned straight: the read is a
+    # Variant, and handing that back as a Color is an unsafe narrowing.
+    var c: Color = v
+    return c
 
 
 func _structure_card(type: StructureType) -> Dictionary:

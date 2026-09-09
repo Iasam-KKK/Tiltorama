@@ -58,6 +58,26 @@ const WANDER_TIMEOUT := 9.0
 ## NavigationServer query -- one per villager per tick, for a doorstep that is not
 ## going anywhere. Well under path_desired_distance (0.4), so no path is coarser.
 const NAV_RETARGET_EPSILON := 0.25
+## How often a villager throws his aim away and asks for a fresh route. The agent
+## repaths itself when the navigation map changes under it, but a wall going up
+## while somebody is mid-stroll is exactly the case that must not be missed, and
+## villagers walk during PREP, which is the only phase the player can build in.
+const NAV_REPATH_SECONDS := 1.3
+## How far the end of a route may sit from the stop and still count as reaching it.
+## The navmesh is rasterised at 0.25 m and carved back by the agent's radius, so the
+## last walkable point beside a doorstep is never exactly the doorstep.
+const ROUTE_SLACK := 0.8
+## Hard ceiling on tumble speed. move_and_slide sweeps, but the ghost below turns
+## the tray floor off, and 18 m/s is 0.30 m in a 60 Hz step -- inside the 0.4 m rim
+## and the 0.6 m floor, so nothing can cross either of them in one tick. Matches
+## Raider.TUMBLE_MAX_SPEED.
+const TUMBLE_MAX_SPEED := 18.0
+## Thickness of the rims (build_main.gd RIM_T). The floor slab a ghosting body
+## could drop through reaches this far past the inside face.
+const RIM_THICKNESS := 0.4
+## Top face of the tray floor. Ghosting below this while still over the tray means
+## the body is INSIDE it, not past it.
+const GHOST_FLOOR_Y := 0.0
 ## Capsule detail. They are 0.7 m tall and the camera sits 32 m out, so a smooth
 ## capsule is triangles nobody can see.
 const MESH_SEGMENTS := 8
@@ -104,6 +124,11 @@ var _nav_warmup := 0
 ## this body was placed, shoved off its path, or the kingdom changed shape.
 var _nav_aim := Vector3.ZERO
 var _nav_aimed := false
+## Set by _desired_direction: the route ran out short of the stop and he is standing
+## on the end of it. Not "no path yet" -- that is a separate answer.
+var _route_failed := false
+## Counts down to the next forced repath. Staggered when he moves in.
+var _repath := 0.0
 var _ghosting := false
 
 
@@ -169,6 +194,10 @@ func place(villager_type: VillagerType, tilt: TiltController, at: Vector3, point
     # A recycled body stands somewhere else entirely; whatever its agent was aimed at
     # belonged to whoever used it last.
     _nav_aimed = false
+    _route_failed = false
+    # Staggered, so a house full of people never all come due for their forced
+    # repath on the same tick.
+    _repath = randf() * NAV_REPATH_SECONDS
     _set_ghost(false)
 
     _mesh.rotation = Vector3.ZERO
@@ -235,6 +264,10 @@ func hit_by_roller(roller: RigidBody3D, speed: float) -> void:
 func _physics_process(dt: float) -> void:
     if _nav_warmup > 0:
         _nav_warmup -= 1
+    _repath = maxf(0.0, _repath - dt)
+    if _repath == 0.0:
+        _repath = NAV_REPATH_SECONDS
+        _nav_aimed = false
     _hit_cooldown = maxf(0.0, _hit_cooldown - dt)
     if _cry_timer > 0.0:
         _cry_timer = maxf(0.0, _cry_timer - dt)
@@ -250,6 +283,15 @@ func _physics_process(dt: float) -> void:
             _do_slide(dt)
         State.TUMBLE:
             _do_tumble(dt)
+
+    # The ghost is a 0.4 m transit through the rim on the way OUT and nothing else.
+    # A body with its collider off that is still over the tray's own slab and below
+    # the floor's top face is INSIDE the tray, not past it -- one more second of that
+    # and it is a villager loose under the world. Hand the collider back and let him
+    # land. Checked in every state, because the way in here is a roller catching a
+    # ghosting body mid-fall and knocking it back inboard.
+    if _ghosting and state != State.DEAD and global_position.y < GHOST_FLOOR_Y and _over_tray_slab():
+        _set_ghost(false)
 
     if state != State.DEAD and global_position.y < FELL_BELOW:
         _die(true)
@@ -283,6 +325,15 @@ func _do_wander(dt: float) -> void:
         velocity.z = 0.0
         return
     var dir := _desired_direction()
+    if _route_failed:
+        # Not a fighter and not a battering ram: a villager who cannot get to a stop
+        # shrugs and picks another one. That is also what stops him pressing into a
+        # wall the player just built for the whole nine seconds of the timeout.
+        state = State.IDLE
+        _dwell = randf_range(type.dwell_min, type.dwell_max)
+        velocity.x = 0.0
+        velocity.z = 0.0
+        return
     velocity.x = dir.x * type.speed
     velocity.z = dir.z * type.speed
     velocity.y -= GRAVITY * dt
@@ -330,6 +381,10 @@ func _do_slide(dt: float) -> void:
 func _do_tumble(dt: float) -> void:
     _tumble_timer = maxf(0.0, _tumble_timer - dt)
     velocity += _gravity_dir() * GRAVITY * dt
+    # Capped every tick, not just at the impulse: a long fall under a leaning gravity
+    # keeps accelerating, and the ghost that carried this body over the rim has the
+    # tray floor turned off behind it.
+    velocity = velocity.limit_length(TUMBLE_MAX_SPEED)
     move_and_slide()
     _mesh.rotate_x(dt * 11.0)
     # Past the tray, so the ghost has done its job (getting through the rim) and the
@@ -362,12 +417,22 @@ func _enter_slide() -> void:
 func _enter_tumble(impulse: Vector3, ghost := false) -> void:
     state = State.TUMBLE
     _tumble_timer = TUMBLE_MIN
-    velocity = impulse
+    # An iron roller (mass 3) at speed against a 0.7 kg villager is momentum / mass
+    # * 0.7, and nothing bounds what the tilt can do to a roller's speed. Clamped so
+    # one knock can never move a body further in a tick than the tray floor is thick.
+    velocity = impulse.limit_length(TUMBLE_MAX_SPEED)
     _nav_aimed = false
     _set_ghost(ghost)
 
 
+## The ghost -- collider off -- exists to cross the 0.4 m lip on the way out of the
+## tray, and for nothing else. Granting one anywhere but at the rim drops the body
+## through the floor instead, so the rule is enforced HERE rather than trusted to
+## every caller. A body that already holds one keeps it: a roller catching a villager
+## mid-fall must not hand the collider back while he is still level with the lip.
 func _set_ghost(on: bool) -> void:
+    if on and not _ghosting and (type == null or not _at_rim()):
+        return
     if _ghosting == on:
         return
     _ghosting = on
@@ -437,6 +502,14 @@ func _at_rim() -> bool:
     return absf(global_position.x) >= edge or absf(global_position.z) >= edge
 
 
+## True while this body is still over the tray's own floor slab -- the inside face
+## plus the thickness of a rim. Combined with being below the floor's top face, this
+## is the test for "inside the tray", which is somewhere nothing may ever be.
+func _over_tray_slab() -> bool:
+    var edge := tray_half + RIM_THICKNESS
+    return absf(global_position.x) < edge and absf(global_position.z) < edge
+
+
 func _hit_a_wall() -> bool:
     for i in get_slide_collision_count():
         if absf(get_slide_collision(i).get_normal().y) < 0.6:
@@ -459,22 +532,80 @@ func _pick_destination() -> void:
     _destination = _waypoints[randi() % _waypoints.size()]
 
 
+## Where to walk this tick, and -- as a side effect -- whether routing has failed.
+##
+## The same three navigation failures the raiders had, and the same fix; see the long
+## note on Raider._desired_direction() for the whole story. In short:
+## is_target_reachable() reads TRUE on an EMPTY path whenever the stop happens to sit
+## near the world origin (get_final_position() returns Vector3.ZERO for one), the
+## partial path Godot returns for an unreachable stop is the way round the obstacle
+## and was being thrown away, and the agent's own waypoint advance measures in 3D
+## against a body standing half a capsule above the mesh its path lies on, so it
+## could never leave the waypoint under its own feet. All three ended at the straight
+## line, which is why a villager walked into a new wall instead of round it.
 func _desired_direction() -> Vector3:
+    _route_failed = false
     var straight := _destination - global_position
     straight.y = 0.0
     var fallback := straight.normalized() if straight.length() > 0.01 else Vector3.ZERO
     if _agent == null or _nav_warmup > 0:
         return fallback
+
     _aim_nav(_destination)
-    if not _agent.is_target_reachable():
-        # Unreachable, or the nav map is not warm yet. The straight line is what makes
-        # the first frames after a move-in work, so keep it -- and forget the aim, so
-        # the moment the map answers he asks again instead of trusting a dead path.
+    # Order matters. get_current_navigation_path() is a const read of whatever the
+    # agent last computed; get_next_path_position() is what makes it run the query.
+    _agent.get_next_path_position()
+    var path := _agent.get_current_navigation_path()
+    if path.is_empty():
+        # The map has no answer yet. Forget the aim so the moment it does answer he
+        # asks again instead of trusting a dead path -- and do NOT read this as "no
+        # way through": nothing has been proven about the world.
         _nav_aimed = false
         return fallback
-    var step := _agent.get_next_path_position() - global_position
-    step.y = 0.0
-    return step.normalized() if step.length() > 0.05 else fallback
+
+    var step := _path_step(path)
+    if step != Vector3.ZERO:
+        return step
+
+    # Standing on the end of the route. Ending at the stop is simply arrival, which
+    # _do_wander notices on its own next tick; ending short of it means something is
+    # in the way and there is nothing here worth pressing into.
+    var end := path[path.size() - 1]
+    _route_failed = Vector2(end.x - _destination.x, end.z - _destination.z).length() > ROUTE_SLACK
+    return fallback
+
+
+## The point on `path` to steer at, flattened. Recomputed from the whole path every
+## tick rather than kept as an index: the agent silently rebuilds its path when the
+## navigation map changes under it -- which is precisely what placing a house does --
+## and an index into a path that is no longer the same path walks a villager
+## backwards. The scan starts at the nearest waypoint and only ever looks FORWARD, so
+## a route that doubles back past him is never rejoined at the wrong end.
+##
+## Returns ZERO when every remaining waypoint is underfoot: this is the end of it.
+func _path_step(path: PackedVector3Array) -> Vector3:
+    var nearest := 0
+    var nearest_d := INF
+    for i in path.size():
+        var d := _flat_distance_to(path[i])
+        if d < nearest_d:
+            nearest_d = d
+            nearest = i
+    for i in range(nearest, path.size()):
+        var to := path[i] - global_position
+        # Flat, and this is the whole reason the agent's own waypoint advance could
+        # not be used: the body stands half a capsule above the mesh the path lies on.
+        to.y = 0.0
+        if to.length() > _agent.path_desired_distance:
+            return to.normalized()
+    return Vector3.ZERO
+
+
+## The kingdom changed shape: a house went up, a wall came down. Whatever path this
+## body is holding was made for a world that no longer exists.
+func notify_world_changed() -> void:
+    _nav_aimed = false
+    _repath = NAV_REPATH_SECONDS
 
 
 ## Aims the agent, but only when that is worth a repath. See NAV_RETARGET_EPSILON.

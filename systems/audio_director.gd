@@ -36,6 +36,9 @@ class_name AudioDirector
 
 @export_group("Mixer")
 ## The greybox gets played muted a lot. False stops every voice before it starts.
+## LEAVE IT TRUE. The game ships silent, but the silence is Options.default_muted
+## muting the Master bus, which F4 can lift. Switching the director off here would
+## silence it a second way that no key can undo, and F4 would look broken.
 @export var enabled := true: set = _set_enabled
 @export var muted := false: set = _set_muted
 @export_range(-60.0, 6.0, 0.5) var master_db := 0.0: set = _set_master_db

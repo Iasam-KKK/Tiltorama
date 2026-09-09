@@ -24,4 +24,4 @@ on_stop_params = {
 }
 cost = 26
 draft_weight = 0.5
-colour = Color(0.91764706, 0.95686275, 1.0, 1)
+colour = Color(0.882, 0.939, 0.980, 1)

@@ -12,6 +12,11 @@ signal emptied()
 @export_range(1, 200, 1) var pool_size := 80
 ## Distance from tray centre to the inside face of a rim.
 @export var tray_half := 5.6
+## Optional. Placing or breaking a structure rebakes the navmesh under everyone who
+## is already walking, and a body holding the path it made before that walks into a
+## wall that was not there when it made it. Without this the raiders still recover
+## on their own forced repath, a second later; with it, immediately.
+@export var build_system: BuildSystem
 
 var _all: Array[Raider] = []
 var _idle: Array[Raider] = []
@@ -25,6 +30,9 @@ func _ready() -> void:
         r.park()
         _all.append(r)
         _idle.append(r)
+
+    if build_system:
+        build_system.structures_changed.connect(notify_world_changed)
 
 
 func alive_count() -> int:
@@ -45,6 +53,14 @@ func clear_all() -> void:
         if not _idle.has(r):
             r.park()
             _idle.append(r)
+
+
+## The kingdom changed shape. Told to the raiders that are actually on the tray --
+## a parked body has no path to invalidate and re-aims on its next launch anyway.
+func notify_world_changed() -> void:
+    for r in _all:
+        if not _idle.has(r):
+            r.notify_world_changed()
 
 
 ## Rollers report their contacts here so raiders do not each need a monitor.

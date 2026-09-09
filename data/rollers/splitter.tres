@@ -21,4 +21,4 @@ on_impact_params = {
 }
 cost = 16
 draft_weight = 2.0
-colour = Color(0.8784314, 0.2509804, 0.49803922, 1)
+colour = Color(0.978, 0.254, 0.556, 1)

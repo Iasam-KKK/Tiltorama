@@ -288,6 +288,51 @@ func spawn_id(type_id: String, n: int) -> int:
 	return _spawn_batch(type_by_id(type_id), n, spawn_centre, spawn_spread)
 
 
+## Put `count` rollers of ONE chosen type on the tray, right now, whatever the draft
+## has granted. `type` may be the RollerType or its id string, so a debug key and a
+## drafted card can both call it without either knowing the other's currency.
+## Returns how many actually came off the idle list: a full tray mints fewer, and
+## zero means either the pool is dry or nothing answers to that name.
+##
+## This is the only on-demand route a chosen type has onto the tray. Every other
+## spawn is untyped (the opening stockpile, Muster, respawn) or comes out of a
+## quarry at the head of a wave, which is why choosing a type used to look like it
+## had done nothing: the choice was recorded and the tray went on showing what was
+## already lying on it.
+func mint_type(type: Variant, count: int) -> int:
+	if count <= 0:
+		return 0
+	var t := resolve_type(type)
+	if t == null:
+		return 0
+	return _spawn_batch(t, count, spawn_centre, spawn_spread)
+
+
+## A type from either currency -- the resource itself, or the id it was authored
+## with. Null for a name nothing answers to, so a caller can tell "no such type"
+## apart from "the pool had nothing left to give".
+func resolve_type(type: Variant) -> RollerType:
+	# Explicit casts rather than a bare return: the parameter is Variant, and an
+	# implicit narrowing would be an unsafe-return warning on every call site.
+	var t := type as RollerType
+	if t:
+		return t
+	if type is String or type is StringName:
+		return type_by_id(String(type))
+	return null
+
+
+## Every id this pool can mint, in catalogue order. A debug selector builds its list
+## from this rather than repeating the catalogue as literals, so a type added to
+## data/rollers/ shows up there with nothing rewired.
+func type_ids() -> PackedStringArray:
+	var out := PackedStringArray()
+	for t in types:
+		if t:
+			out.append(t.id)
+	return out
+
+
 func respawn() -> void:
 	clear()
 	_lost = 0
@@ -373,6 +418,19 @@ func radius_of(r: RigidBody3D) -> float:
 	if s == null or s.bucket < 0:
 		return float(int(round(radius / SIZE_STEP))) * SIZE_STEP
 	return float(s.bucket) * SIZE_STEP
+
+
+## The colour this body is actually WEARING, read back off the material on its mesh
+## rather than off its type. The two answers differ exactly when a retype fails to
+## reach the mesh, which is the shape of "I picked iron and the marbles did not
+## change" -- so this, never RollerType.colour, is what a test should assert on.
+## RollerType.colour is only what the colour was supposed to be.
+func colour_of(r: RigidBody3D) -> Color:
+	var s := _slot_of(r)
+	if s == null:
+		return colour
+	var mat := s.mesh.material_override as StandardMaterial3D
+	return mat.albedo_color if mat else colour
 
 
 # --- effects (driven by ImpactResolver) -----------------------------------

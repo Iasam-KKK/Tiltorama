@@ -11,3 +11,4 @@ cost = 30
 footprint = Vector3(0.7, 0.6, 0.7)
 colour = Color(0.76862746, 0.3254902, 0.22745098, 1)
 description = "Redirects and adds speed. Bouncy loves it."
+max_hp = 50

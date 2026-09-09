@@ -29,6 +29,12 @@ signal income_paid(gold: int, villagers: int)
 ## Optional. Tray modifiers such as Hobnails raise villager footing; without a
 ## loadout the people simply keep the footing their VillagerType ships with.
 @export var loadout: Loadout
+## Optional. Placing or breaking a structure rebakes the navmesh under everyone who
+## is already walking, and a body holding the path it made before that walks into a
+## wall that was not there when it made it. Villagers wander during PREP, which is
+## the phase the player builds in, so this is the pair of eyes that matters most.
+## Without it they still recover on their own forced repath, a second later.
+@export var build_system: BuildSystem
 @export_range(1, 64, 1) var pool_size := 24
 ## Distance from tray centre to the inside face of a rim.
 @export var tray_half := 5.6
@@ -80,6 +86,8 @@ func _ready() -> void:
         run_state.wave_changed.connect(_on_wave_changed)
     if loadout:
         loadout.changed.connect(_apply_loadout)
+    if build_system:
+        build_system.structures_changed.connect(notify_world_changed)
     _apply_loadout()
 
 
@@ -112,6 +120,19 @@ func income_per_wave() -> int:
     if villager_type == null:
         return 0
     return alive_count() * villager_type.income
+
+
+## The kingdom changed shape. Told to the people who are actually out on the tray;
+## a parked body has no path to invalidate and re-aims when he next moves in.
+##
+## Not the same job as _refresh_houses(): that one rebuilds the LIST of stops when a
+## house appears or goes, and set_waypoints() drops the aim when the list really
+## changed. A wall changes no stop at all -- it changes the way between them -- and
+## that is the case this covers.
+func notify_world_changed() -> void:
+    for v in _all:
+        if v.is_active():
+            v.notify_world_changed()
 
 
 ## Mirrors RaiderPool: rollers report their contacts to the pool so villagers do

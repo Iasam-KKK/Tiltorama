@@ -40,6 +40,18 @@ const TILT_CEILING_DEG := 30.0
 ## Roller types minted from wave 1. Empty is the correct value until roller cards
 ## exist: the pool goes on minting its default sphere.
 @export var starting_roller_types: Array[Resource] = []
+## How many of a roller type are tipped onto the tray the MOMENT its card is taken.
+##
+## Zero is the old behaviour: the type is recorded and the player waits. That wait
+## is why taking Iron read as a no-op. The quarries are the only other route onto
+## the tray, they run once at the head of a wave, they cut five between them, and
+## they share those five round-robin across every type drafted so far -- so the
+## reward for picking Iron was two orange marbles arriving a wave later onto a tray
+## already holding thirty blue ones, and none at all for a player with no quarry up.
+## A card the player cannot see land is a card that did not happen. Six is roughly a
+## fifth of the opening stockpile: enough of the new hue to read from the top-down
+## camera, not so much that the card hands the wave over.
+@export_range(0, 40, 1) var roller_card_sample := 6
 
 @export_group("Limits")
 ## The villager type a footing card is measured against; only footing_deg is read.
@@ -116,6 +128,14 @@ func add_roller_type(type: Resource) -> bool:
     if type == null or roller_types.has(type):
         return false
     roller_types.append(type)
+    # Poured here for the same reason Full Stores pours its stock in
+    # _apply_to_world() rather than leaving it as a number: what the card grants is
+    # read at the head of a wave and nowhere else, so on its own it moves nothing
+    # the player can see until the wave after next. This is the one moment the
+    # player is looking straight at the choice, so it is the moment the new hue has
+    # to appear on the tray.
+    if roller_pool and roller_card_sample > 0:
+        roller_pool.mint_type(type, roller_card_sample)
     roller_type_added.emit(type)
     changed.emit()
     return true

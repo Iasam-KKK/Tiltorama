@@ -15,4 +15,4 @@ knockback = 1.0
 on_impact = "stick"
 cost = 20
 draft_weight = 0.5
-colour = Color(0.6039216, 0.36078432, 0.8392157, 1)
+colour = Color(0.444, 0.227, 0.598, 1)

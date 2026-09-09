@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="StructureType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/structure_type.gd" id="1_halfpipe"]
+
+[resource]
+script = ExtResource("1_halfpipe")
+id = "half_pipe"
+display_name = "Half-pipe"
+kind = 7
+cost = 35
+footprint = Vector3(1.8, 0.9, 1.8)
+colour = Color(0.34901962, 0.54901963, 0.49803922, 1)
+description = "A banked turn. Rollers come out of it as fast as they went in, which is how a stockpile reaches the far rim."
+max_hp = 55
+wall_thickness = 0.22
+arc_radius = 1.6
+arc_deg = 90.0
+arc_segments = 6
+bank_deg = 32.0

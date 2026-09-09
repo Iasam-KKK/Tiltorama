@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="StructureType" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://data/structure_type.gd" id="1_funnel"]
+
+[resource]
+script = ExtResource("1_funnel")
+id = "funnel"
+display_name = "Funnel"
+kind = 6
+cost = 25
+footprint = Vector3(2, 0.8, 1.6)
+colour = Color(0.41960785, 0.47843137, 0.54901963, 1)
+description = "Two walls leaning in. A spread of rollers goes in across the mouth and comes out of the throat in one line."
+max_hp = 45
+wall_thickness = 0.22
+throat_width = 0.6

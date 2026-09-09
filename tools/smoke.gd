@@ -85,6 +85,9 @@ var _run_started := false
 var _paid: Array = []
 var _purse_after_pay := 0
 var _purse_at_wave_start := 0
+## Bumped from a signal, so it has to be a member: a lambda captures a local by
+## value and the count would never leave the closure.
+var _wall_damage_events := 0
 ## What the tray ships as its full lean, read once before the harness leans on the
 ## property itself so the second stage puts back exactly what the designer set.
 var _max_tilt := 12.0
@@ -123,6 +126,7 @@ func _run() -> void:
     # drive means a scene that will not boot cannot hide them.
     _budget_curve()
     _boss_wave()
+    _roller_palette()
     await _live()
     _report()
 
@@ -270,6 +274,8 @@ func _live() -> void:
     await _full_tilt()
     await _wave_pays()
     await _draft_opens_and_closes()
+    await _routes_around_a_wall()
+    await _sealed_keep_is_breached()
 
 
 ## Raiders arrive over a rim, not out of the middle of the tray. Sampled every frame
@@ -474,6 +480,139 @@ func _end_note() -> String:
 
 func _over_budget() -> bool:
     return float(Time.get_ticks_msec() - _real_start) * 0.001 > REAL_BUDGET_SECONDS
+
+
+## THE ASSERTION THIS HARNESS EXISTED WITHOUT FOR TOO LONG.
+##
+## The old day-3 check asserted "a raider closes distance on the keep" -- which a
+## straight-line beeline satisfies exactly as well as real navigation. It could not
+## fail, so the pathing bug survived every automated run and Ben found it by hand in
+## ten minutes: walls made raiders stall instead of route.
+##
+## This one fails on a beeline. A fence goes across the direct line with both ends
+## open; the straight route runs along x = 0, so lateral drift IS the evidence that a
+## route was computed. A raider that beelines scores ~0 and jams against the fence.
+func _routes_around_a_wall() -> void:
+    _raiders.clear_all()
+    for x in [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5]:
+        _build("wall", Vector3(x, 0.0, -2.5))
+
+    var grunt: RaiderType = load("res://data/raiders/grunt.tres")
+    var r := _raiders.spawn(grunt, Vector3(0.0, -0.7, -6.5), Vector3(0.0, 0.05, -4.9))
+    if not _check("a raider spawns for the pathing check", r != null):
+        return
+
+    var drift := 0.0
+    var closest := INF
+    var deadline := _sim + 30.0
+    while _sim < deadline and not _over_budget():
+        if not is_instance_valid(r) or not r.visible:
+            break
+        drift = maxf(drift, absf(r.global_position.x))
+        closest = minf(closest, Vector2(r.global_position.x, r.global_position.z).length())
+        if closest < 1.5:
+            break
+        await process_frame
+
+    _check("a raider routes AROUND a wall rather than into it", drift > 1.5,
+        "drifted %.2f m off the straight line; a beeline scores ~0" % drift)
+    _check("and still arrives at the keep", closest < 1.8,
+        "closest approach %.2f m" % closest)
+
+
+## Sealing the kingdom must not be an exploit that ends the game, and the one thing a
+## walled-in raider may never do is what Ben watched them do: stand there. With no
+## route at all a grunt takes the wall apart. This bypasses BuildSystem's own seal
+## check on purpose -- the question is what the RAIDERS do once the world is sealed.
+func _sealed_keep_is_breached() -> void:
+    _raiders.clear_all()
+    # The previous check leaves a fence standing. Two nested barriers is a different
+    # question from a sealed keep -- the raider spends its whole budget detouring
+    # round the outer one and never reaches the ring, which reads as "it never
+    # breached" when nothing is wrong. Isolate.
+    _clear_structures()
+    var ring: Array[Vector3] = []
+    for x in [-2.0, -1.0, 0.0, 1.0, 2.0]:
+        ring.append(Vector3(x, 0.0, -2.0))
+        ring.append(Vector3(x, 0.0, 2.0))
+    for z in [-1.0, 0.0, 1.0]:
+        ring.append(Vector3(-2.0, 0.0, z))
+        ring.append(Vector3(2.0, 0.0, z))
+    for at in ring:
+        _build("wall", at)
+
+    _wall_damage_events = 0
+    for child in _structures.get_children():
+        var s := child as Structure
+        if s:
+            s.damaged.connect(_on_wall_damaged)
+
+    var grunt: RaiderType = load("res://data/raiders/grunt.tres")
+    var r := _raiders.spawn(grunt, Vector3(0.0, -0.7, -6.5), Vector3(0.0, 0.05, -4.9))
+    if not _check("a raider spawns for the seal check", r != null):
+        return
+
+    var breached := false
+    var moved := 0.0
+    var last := r.global_position
+    var deadline := _sim + 30.0
+    while _sim < deadline and not _over_budget():
+        if not is_instance_valid(r) or not r.visible:
+            break
+        if r.state == Raider.State.BREACH or r.state == Raider.State.SCALE:
+            breached = true
+        moved += r.global_position.distance_to(last)
+        last = r.global_position
+        if _wall_damage_events > 0:
+            break
+        await process_frame
+
+    _check("a walled-in raider attacks the wall instead of standing still", breached,
+        "state %d, travelled %.1f m" % [r.state if is_instance_valid(r) else -1, moved])
+    _check("and the wall actually takes damage", _wall_damage_events > 0,
+        "%d damage events" % _wall_damage_events)
+
+
+func _on_wall_damaged(_s: Structure, _hp: int, _max_hp: int) -> void:
+    _wall_damage_events += 1
+
+
+## remove_child before queue_free: a freed-next-frame child is still in the list this
+## frame, and every base-value walk and overlap test would still count it.
+func _clear_structures() -> void:
+    for child in _structures.get_children():
+        _structures.remove_child(child)
+        child.queue_free()
+    if _nav and _nav.navigation_mesh:
+        _nav.bake_navigation_mesh(false)
+
+
+## Six names are not six colours. The shipped palette had every roller at HSV value
+## 0.82-1.00, so four of the six sat inside an 0.087 luminance band -- iron and stone
+## were 0.013 apart, the same brightness with a different tint, on a tray whose own
+## luminance is 0.477. From 32 m at FOV 25 that is one marble. Rollers being the only
+## saturated things out there is what makes them readable, and a value ladder is what
+## makes them readable from EACH OTHER.
+func _roller_palette() -> void:
+    var ids := ["stone", "iron", "bouncy", "splitter", "snowball", "sticky"]
+    var lums: Array[float] = []
+    for id in ids:
+        var t: RollerType = load("res://data/rollers/%s.tres" % id)
+        if t == null:
+            continue
+        var c := t.colour
+        lums.append(0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b)
+    lums.sort()
+    var worst := 1.0
+    var worst_pair := 0
+    for i in lums.size() - 1:
+        var gap := lums[i + 1] - lums[i]
+        if gap < worst:
+            worst = gap
+            worst_pair = i
+    _check("no two roller types share a brightness", lums.size() == ids.size() and worst >= 0.10,
+        "closest pair %.3f apart (%.3f vs %.3f); the bar is 0.10"
+            % [worst, lums[worst_pair], lums[worst_pair + 1]])
 
 
 func _check(label: String, ok: bool, detail := "") -> bool:
