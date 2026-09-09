@@ -1,55 +1,55 @@
-[gd_scene format=4]
+[gd_scene format=4 uid="uid://bl0e7sfg53w3m"]
 
-[ext_resource type="Script" path="res://systems/main.gd" id="1_j2jfr"]
-[ext_resource type="Script" path="res://systems/keep.gd" id="2_bjg73"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/tower-square-base.glb" id="3_bu4jf"]
-[ext_resource type="Texture2D" path="res://assets/models/castle/Textures/colormap.png" id="4_o7ddy"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/tower-square-mid.glb" id="5_0loja"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/tower-square-top-roof.glb" id="6_ids8r"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/tree-small.glb" id="7_dnhof"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/tree-log.glb" id="8_1v6qk"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/rocks-small.glb" id="9_augu2"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/tree-large.glb" id="10_tm6hj"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/rocks-large.glb" id="11_kf5aa"]
-[ext_resource type="PackedScene" path="res://assets/models/castle/flag.glb" id="12_t5ykj"]
-[ext_resource type="Script" path="res://systems/kill_volume.gd" id="13_e755i"]
-[ext_resource type="Script" path="res://systems/roller_pool.gd" id="14_ro3en"]
-[ext_resource type="Script" path="res://data/roller_type.gd" id="15_od4ux"]
+[ext_resource type="Script" uid="uid://cntnfvjuq74vl" path="res://systems/main.gd" id="1_j2jfr"]
+[ext_resource type="Script" uid="uid://bkep8fklhtrka" path="res://systems/keep.gd" id="2_bjg73"]
+[ext_resource type="PackedScene" uid="uid://b433wu3kn33vj" path="res://assets/models/castle/tower-square-base.glb" id="3_bu4jf"]
+[ext_resource type="Texture2D" uid="uid://dugl7kjw2y34a" path="res://assets/models/castle/Textures/colormap.png" id="4_o7ddy"]
+[ext_resource type="PackedScene" uid="uid://fitty1sl1n2j" path="res://assets/models/castle/tower-square-mid.glb" id="5_0loja"]
+[ext_resource type="PackedScene" uid="uid://cxuxsud4qd83j" path="res://assets/models/castle/tower-square-top-roof.glb" id="6_ids8r"]
+[ext_resource type="PackedScene" uid="uid://bnpwdj6dbkb71" path="res://assets/models/castle/tree-small.glb" id="7_dnhof"]
+[ext_resource type="PackedScene" uid="uid://bit6ugm2lu6h4" path="res://assets/models/castle/tree-log.glb" id="8_1v6qk"]
+[ext_resource type="PackedScene" uid="uid://c87lhma8s84cg" path="res://assets/models/castle/rocks-small.glb" id="9_augu2"]
+[ext_resource type="PackedScene" uid="uid://b2e6b3ofsbhnp" path="res://assets/models/castle/tree-large.glb" id="10_tm6hj"]
+[ext_resource type="PackedScene" uid="uid://h5brj1gvaxvk" path="res://assets/models/castle/rocks-large.glb" id="11_kf5aa"]
+[ext_resource type="PackedScene" uid="uid://d2kdo2yjqd7ef" path="res://assets/models/castle/flag.glb" id="12_t5ykj"]
+[ext_resource type="Script" uid="uid://byg301u7fcse" path="res://systems/kill_volume.gd" id="13_e755i"]
+[ext_resource type="Script" uid="uid://cur1oy7op1n7u" path="res://systems/roller_pool.gd" id="14_ro3en"]
+[ext_resource type="Script" uid="uid://cbcvj2mml1mcj" path="res://data/roller_type.gd" id="15_od4ux"]
 [ext_resource type="Resource" path="res://data/rollers/stone.tres" id="16_xhfw6"]
 [ext_resource type="Resource" path="res://data/rollers/iron.tres" id="17_1epgm"]
 [ext_resource type="Resource" path="res://data/rollers/bouncy.tres" id="18_152kg"]
 [ext_resource type="Resource" path="res://data/rollers/splitter.tres" id="19_r4e17"]
 [ext_resource type="Resource" path="res://data/rollers/snowball.tres" id="20_y57op"]
 [ext_resource type="Resource" path="res://data/rollers/sticky.tres" id="21_mlv25"]
-[ext_resource type="Script" path="res://systems/raider_pool.gd" id="22_a82wo"]
-[ext_resource type="Script" path="res://systems/villager_pool.gd" id="23_gdvew"]
+[ext_resource type="Script" uid="uid://2jl3huokmm6y" path="res://systems/raider_pool.gd" id="22_a82wo"]
+[ext_resource type="Script" uid="uid://c5wjwgm2864wp" path="res://systems/villager_pool.gd" id="23_gdvew"]
 [ext_resource type="Resource" path="res://data/villagers/villager.tres" id="24_kjtvk"]
-[ext_resource type="Script" path="res://systems/tilt_controller.gd" id="25_xrs0c"]
-[ext_resource type="Script" path="res://systems/wave_director.gd" id="26_xljpf"]
+[ext_resource type="Script" uid="uid://beect1tkxe276" path="res://systems/tilt_controller.gd" id="25_xrs0c"]
+[ext_resource type="Script" uid="uid://bceh73tocltpi" path="res://systems/wave_director.gd" id="26_xljpf"]
 [ext_resource type="Resource" path="res://data/waves.tres" id="27_j4bwh"]
-[ext_resource type="Script" path="res://data/raider_type.gd" id="28_ksmap"]
+[ext_resource type="Script" uid="uid://cqi504aydrjkk" path="res://data/raider_type.gd" id="28_ksmap"]
 [ext_resource type="Resource" path="res://data/raiders/grunt.tres" id="29_ygd8o"]
 [ext_resource type="Resource" path="res://data/raiders/climber.tres" id="30_2s0kr"]
 [ext_resource type="Resource" path="res://data/raiders/shieldwall.tres" id="31_xaipn"]
 [ext_resource type="Resource" path="res://data/raiders/anchor.tres" id="32_ndrjj"]
 [ext_resource type="Resource" path="res://data/raiders/jarl.tres" id="33_ih3m7"]
-[ext_resource type="Script" path="res://systems/economy.gd" id="34_11yus"]
-[ext_resource type="Script" path="res://systems/run_state.gd" id="35_b6ruc"]
-[ext_resource type="Script" path="res://systems/audio_director.gd" id="36_155or"]
-[ext_resource type="Script" path="res://systems/impact_resolver.gd" id="37_vtx2l"]
-[ext_resource type="Script" path="res://systems/loadout.gd" id="38_63lxy"]
-[ext_resource type="Script" path="res://systems/draft_system.gd" id="39_fjhjs"]
-[ext_resource type="Script" path="res://systems/options.gd" id="40_bfu41"]
-[ext_resource type="Script" path="res://systems/juice.gd" id="41_r4ag1"]
-[ext_resource type="Script" path="res://systems/build_system.gd" id="42_v0wtd"]
-[ext_resource type="Script" path="res://data/structure_type.gd" id="43_sgvw8"]
+[ext_resource type="Script" uid="uid://dm0l31k6gjom0" path="res://systems/economy.gd" id="34_11yus"]
+[ext_resource type="Script" uid="uid://dx8vvpah6ep7v" path="res://systems/run_state.gd" id="35_b6ruc"]
+[ext_resource type="Script" uid="uid://5u43fh84rvje" path="res://systems/audio_director.gd" id="36_155or"]
+[ext_resource type="Script" uid="uid://b7pu631y5evbp" path="res://systems/impact_resolver.gd" id="37_vtx2l"]
+[ext_resource type="Script" uid="uid://33ehniphfobo" path="res://systems/loadout.gd" id="38_63lxy"]
+[ext_resource type="Script" uid="uid://cmda44fuptm2e" path="res://systems/draft_system.gd" id="39_fjhjs"]
+[ext_resource type="Script" uid="uid://cu2favihflwkq" path="res://systems/options.gd" id="40_bfu41"]
+[ext_resource type="Script" uid="uid://bb8puv2ge0qyk" path="res://systems/juice.gd" id="41_r4ag1"]
+[ext_resource type="Script" uid="uid://0fy21vqrcru5" path="res://systems/build_system.gd" id="42_v0wtd"]
+[ext_resource type="Script" uid="uid://dvgxaxdagb6l5" path="res://data/structure_type.gd" id="43_sgvw8"]
 [ext_resource type="Resource" path="res://data/structures/quarry.tres" id="44_6nfnn"]
 [ext_resource type="Resource" path="res://data/structures/gate.tres" id="45_4ue30"]
 [ext_resource type="Resource" path="res://data/structures/ramp.tres" id="46_k42av"]
 [ext_resource type="Resource" path="res://data/structures/half_pipe.tres" id="47_gr8w0"]
-[ext_resource type="Script" path="res://systems/hud.gd" id="48_673bd"]
-[ext_resource type="Script" path="res://systems/debug_panel.gd" id="49_akjxb"]
-[ext_resource type="Script" path="res://systems/draft_ui.gd" id="50_vrx01"]
+[ext_resource type="Script" uid="uid://cjrnvarc0jdwv" path="res://systems/hud.gd" id="48_673bd"]
+[ext_resource type="Script" uid="uid://d3olo4mp22yqr" path="res://systems/debug_panel.gd" id="49_akjxb"]
+[ext_resource type="Script" uid="uid://os1qhe8nfy15" path="res://systems/draft_ui.gd" id="50_vrx01"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_1uevf"]
 sky_top_color = Color(0.29, 0.47, 0.69, 1)
@@ -90,6 +90,7 @@ agent_height = 1.0
 agent_radius = 0.25
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_xmrkg"]
+vertex_color_use_as_albedo = true
 albedo_color = Color(0.43137255, 0.49803922, 0.40784314, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_wvlrk"]
@@ -259,6 +260,7 @@ shadow_mesh = SubResource("ArrayMesh_kr0pq")
 size = Vector3(1, 2.6, 1)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_joh2r"]
+vertex_color_use_as_albedo = true
 albedo_color = Color(0.35686275, 0.2901961, 0.21960784, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_yton5"]
@@ -650,21 +652,21 @@ shape = SubResource("BoxShape3D_f5chs")
 [node name="Keep" type="StaticBody3D" parent="World/NavRegion" unique_id=1807690429]
 script = ExtResource("2_bjg73")
 
-[node name="tower-square-base" type="Node3D" parent="World/NavRegion/Keep" unique_id=850775317 instance=ExtResource("3_bu4jf")]
+[node name="tower-square-base" parent="World/NavRegion/Keep" unique_id=850775317 instance=ExtResource("3_bu4jf")]
 
-[node name="tower-square-base" type="MeshInstance3D" parent="World/NavRegion/Keep/tower-square-base" unique_id=1277091480]
+[node name="tower-square-base2" type="MeshInstance3D" parent="World/NavRegion/Keep/tower-square-base" unique_id=1277091480]
 mesh = SubResource("ArrayMesh_45die")
 
-[node name="tower-square-mid" type="Node3D" parent="World/NavRegion/Keep" unique_id=1794627182 instance=ExtResource("5_0loja")]
+[node name="tower-square-mid" parent="World/NavRegion/Keep" unique_id=1794627182 instance=ExtResource("5_0loja")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
 
-[node name="tower-square-mid" type="MeshInstance3D" parent="World/NavRegion/Keep/tower-square-mid" unique_id=701967979]
+[node name="tower-square-mid2" type="MeshInstance3D" parent="World/NavRegion/Keep/tower-square-mid" unique_id=701967979]
 mesh = SubResource("ArrayMesh_xgg8j")
 
-[node name="tower-square-top-roof" type="Node3D" parent="World/NavRegion/Keep" unique_id=1419285248 instance=ExtResource("6_ids8r")]
+[node name="tower-square-top-roof" parent="World/NavRegion/Keep" unique_id=1419285248 instance=ExtResource("6_ids8r")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 
-[node name="tower-square-top-roof" type="MeshInstance3D" parent="World/NavRegion/Keep/tower-square-top-roof" unique_id=1348220864]
+[node name="tower-square-top-roof2" type="MeshInstance3D" parent="World/NavRegion/Keep/tower-square-top-roof" unique_id=1348220864]
 mesh = SubResource("ArrayMesh_cyqhv")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="World/NavRegion/Keep" unique_id=1158444656]
@@ -705,189 +707,189 @@ material_override = SubResource("StandardMaterial3D_4ahvx")
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_jp61a")
 
-[node name="tree-small_0" type="Node3D" parent="World/Scenery" unique_id=452134867 instance=ExtResource("7_dnhof")]
+[node name="tree-small_0" parent="World/Scenery" unique_id=452134867 instance=ExtResource("7_dnhof")]
 transform = Transform3D(0.73047113, 0, 0.32620835, 0, 0.8, 0, -0.32620835, 0, 0.73047113, -5.4, 0, -5.35)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_0" unique_id=961141230]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_0" unique_id=961141230]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="tree-log_1" type="Node3D" parent="World/Scenery" unique_id=1331669237 instance=ExtResource("8_1v6qk")]
+[node name="tree-log_1" parent="World/Scenery" unique_id=1331669237 instance=ExtResource("8_1v6qk")]
 transform = Transform3D(0.9838437, 0, 0.17902958, 0, 1, 0, -0.17902958, 0, 0.9838437, -2.6, 0, -5.35)
 
-[node name="tree-log" type="MeshInstance3D" parent="World/Scenery/tree-log_1" unique_id=1225909557]
+[node name="tree-log2" type="MeshInstance3D" parent="World/Scenery/tree-log_1" unique_id=1225909557]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_tpwty")
 
-[node name="rocks-small_2" type="Node3D" parent="World/Scenery" unique_id=229881467 instance=ExtResource("9_augu2")]
+[node name="rocks-small_2" parent="World/Scenery" unique_id=229881467 instance=ExtResource("9_augu2")]
 transform = Transform3D(-0.5998221, 0, 0.360851, 0, 0.7, 0, -0.360851, 0, -0.5998221, -5.35, 0, -2.4)
 
-[node name="rocks-small" type="MeshInstance3D" parent="World/Scenery/rocks-small_2" unique_id=1263032328]
+[node name="rocks-small2" type="MeshInstance3D" parent="World/Scenery/rocks-small_2" unique_id=1263032328]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_6ry4b")
 
-[node name="tree-large_3" type="Node3D" parent="World/Scenery" unique_id=547042268 instance=ExtResource("10_tm6hj")]
+[node name="tree-large_3" parent="World/Scenery" unique_id=547042268 instance=ExtResource("10_tm6hj")]
 transform = Transform3D(0.6526905, 0, 0.82249326, 0, 1.05, 0, -0.82249326, 0, 0.6526905, 5.3, 0, -5.35)
 
-[node name="tree-large" type="MeshInstance3D" parent="World/Scenery/tree-large_3" unique_id=1261232528]
+[node name="tree-large2" type="MeshInstance3D" parent="World/Scenery/tree-large_3" unique_id=1261232528]
 mesh = SubResource("ArrayMesh_5vy31")
 
-[node name="tree-small_4" type="Node3D" parent="World/Scenery" unique_id=1083807062 instance=ExtResource("7_dnhof")]
+[node name="tree-small_4" parent="World/Scenery" unique_id=1083807062 instance=ExtResource("7_dnhof")]
 transform = Transform3D(-0.52965105, 0, 0.7276467, 0, 0.9, 0, -0.7276467, 0, -0.52965105, 4.35, 0, -5.35)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_4" unique_id=257939671]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_4" unique_id=257939671]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="tree-small_5" type="Node3D" parent="World/Scenery" unique_id=1689376544 instance=ExtResource("7_dnhof")]
+[node name="tree-small_5" parent="World/Scenery" unique_id=1689376544 instance=ExtResource("7_dnhof")]
 transform = Transform3D(-0.431118, 0, -0.6137078, 0, 0.75, 0, 0.6137078, 0, -0.431118, 5.35, 0, -4.05)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_5" unique_id=1060449868]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_5" unique_id=1060449868]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="tree-log_6" type="Node3D" parent="World/Scenery" unique_id=1305505151 instance=ExtResource("8_1v6qk")]
+[node name="tree-log_6" parent="World/Scenery" unique_id=1305505151 instance=ExtResource("8_1v6qk")]
 transform = Transform3D(0.9393727, 0, 0.3428978, 0, 1, 0, -0.3428978, 0, 0.9393727, 3.5, 0, -5.3)
 
-[node name="tree-log" type="MeshInstance3D" parent="World/Scenery/tree-log_6" unique_id=477611608]
+[node name="tree-log2" type="MeshInstance3D" parent="World/Scenery/tree-log_6" unique_id=477611608]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_tpwty")
 
-[node name="rocks-large_7" type="Node3D" parent="World/Scenery" unique_id=1066840916 instance=ExtResource("11_kf5aa")]
+[node name="rocks-large_7" parent="World/Scenery" unique_id=1066840916 instance=ExtResource("11_kf5aa")]
 transform = Transform3D(0.1019803, 0, 0.59126985, 0, 0.6, 0, -0.59126985, 0, 0.1019803, 5.2, 0, -3.15)
 
-[node name="rocks-large" type="MeshInstance3D" parent="World/Scenery/rocks-large_7" unique_id=2097767340]
+[node name="rocks-large2" type="MeshInstance3D" parent="World/Scenery/rocks-large_7" unique_id=2097767340]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_3ng0q")
 
-[node name="tree-small_8" type="Node3D" parent="World/Scenery" unique_id=1413824543 instance=ExtResource("7_dnhof")]
+[node name="tree-small_8" parent="World/Scenery" unique_id=1413824543 instance=ExtResource("7_dnhof")]
 transform = Transform3D(0.36287686, 0, 0.7129659, 0, 0.8, 0, -0.7129659, 0, 0.36287686, 5.35, 0, 3.9)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_8" unique_id=481737238]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_8" unique_id=481737238]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="tree-small_9" type="Node3D" parent="World/Scenery" unique_id=633049786 instance=ExtResource("7_dnhof")]
+[node name="tree-small_9" parent="World/Scenery" unique_id=633049786 instance=ExtResource("7_dnhof")]
 transform = Transform3D(-0.6284188, 0, -0.16610178, 0, 0.65, 0, 0.16610178, 0, -0.6284188, 5.4, 0, 5.4)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_9" unique_id=1852643892]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_9" unique_id=1852643892]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="rocks-small_10" type="Node3D" parent="World/Scenery" unique_id=1437287329 instance=ExtResource("9_augu2")]
+[node name="rocks-small_10" parent="World/Scenery" unique_id=1437287329 instance=ExtResource("9_augu2")]
 transform = Transform3D(0.24111287, 0, -0.81508565, 0, 0.85, 0, 0.81508565, 0, 0.24111287, 3.5, 0, 5.3)
 
-[node name="rocks-small" type="MeshInstance3D" parent="World/Scenery/rocks-small_10" unique_id=645527738]
+[node name="rocks-small2" type="MeshInstance3D" parent="World/Scenery/rocks-small_10" unique_id=645527738]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_6ry4b")
 
-[node name="tree-log_11" type="Node3D" parent="World/Scenery" unique_id=1780126490 instance=ExtResource("8_1v6qk")]
+[node name="tree-log_11" parent="World/Scenery" unique_id=1780126490 instance=ExtResource("8_1v6qk")]
 transform = Transform3D(0.88989395, 0, 0.13449432, 0, 0.9, 0, -0.13449432, 0, 0.88989395, 5.3, 0, 2.7)
 
-[node name="tree-log" type="MeshInstance3D" parent="World/Scenery/tree-log_11" unique_id=1242101207]
+[node name="tree-log2" type="MeshInstance3D" parent="World/Scenery/tree-log_11" unique_id=1242101207]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_tpwty")
 
-[node name="tree-large_12" type="Node3D" parent="World/Scenery" unique_id=873349689 instance=ExtResource("10_tm6hj")]
+[node name="tree-large_12" parent="World/Scenery" unique_id=873349689 instance=ExtResource("10_tm6hj")]
 transform = Transform3D(0.81434405, 0, -0.66283, 0, 1.05, 0, 0.66283, 0, 0.81434405, -5.3, 0, 4.2)
 
-[node name="tree-large" type="MeshInstance3D" parent="World/Scenery/tree-large_12" unique_id=1173192914]
+[node name="tree-large2" type="MeshInstance3D" parent="World/Scenery/tree-large_12" unique_id=1173192914]
 mesh = SubResource("ArrayMesh_5vy31")
 
-[node name="tree-small_13" type="Node3D" parent="World/Scenery" unique_id=54087304 instance=ExtResource("7_dnhof")]
+[node name="tree-small_13" parent="World/Scenery" unique_id=54087304 instance=ExtResource("7_dnhof")]
 transform = Transform3D(-0.82531446, 0, 0.20336185, 0, 0.85, 0, -0.20336185, 0, -0.82531446, -4.1, 0, 5.35)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_13" unique_id=620898614]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_13" unique_id=620898614]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="tree-small_14" type="Node3D" parent="World/Scenery" unique_id=1767073754 instance=ExtResource("7_dnhof")]
+[node name="tree-small_14" parent="World/Scenery" unique_id=1767073754 instance=ExtResource("7_dnhof")]
 transform = Transform3D(0.5121822, 0, 0.47714713, 0, 0.7, 0, -0.47714713, 0, 0.5121822, -5.35, 0, 5.4)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_14" unique_id=1579792022]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_14" unique_id=1579792022]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="tree-log_15" type="Node3D" parent="World/Scenery" unique_id=954478418 instance=ExtResource("8_1v6qk")]
+[node name="tree-log_15" parent="World/Scenery" unique_id=954478418 instance=ExtResource("8_1v6qk")]
 transform = Transform3D(0.9950042, 0, 0.09983342, 0, 1, 0, -0.09983342, 0, 0.9950042, -3.2, 0, 5.3)
 
-[node name="tree-log" type="MeshInstance3D" parent="World/Scenery/tree-log_15" unique_id=870753474]
+[node name="tree-log2" type="MeshInstance3D" parent="World/Scenery/tree-log_15" unique_id=870753474]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_tpwty")
 
-[node name="rocks-large_16" type="Node3D" parent="World/Scenery" unique_id=1833108290 instance=ExtResource("11_kf5aa")]
+[node name="rocks-large_16" parent="World/Scenery" unique_id=1833108290 instance=ExtResource("11_kf5aa")]
 transform = Transform3D(-0.466455, 0, -0.2914099, 0, 0.55, 0, 0.2914099, 0, -0.466455, -5.25, 0, 3)
 
-[node name="rocks-large" type="MeshInstance3D" parent="World/Scenery/rocks-large_16" unique_id=2035478526]
+[node name="rocks-large2" type="MeshInstance3D" parent="World/Scenery/rocks-large_16" unique_id=2035478526]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_3ng0q")
 
-[node name="rocks-small_17" type="Node3D" parent="World/Scenery" unique_id=406733139 instance=ExtResource("9_augu2")]
+[node name="rocks-small_17" parent="World/Scenery" unique_id=406733139 instance=ExtResource("9_augu2")]
 transform = Transform3D(0.12037449, 0, 0.43360117, 0, 0.45, 0, -0.43360117, 0, 0.12037449, 0.9, 0, -5.42)
 
-[node name="rocks-small" type="MeshInstance3D" parent="World/Scenery/rocks-small_17" unique_id=1233274444]
+[node name="rocks-small2" type="MeshInstance3D" parent="World/Scenery/rocks-small_17" unique_id=1233274444]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_6ry4b")
 
-[node name="rocks-small_18" type="Node3D" parent="World/Scenery" unique_id=234055787 instance=ExtResource("9_augu2")]
+[node name="rocks-small_18" parent="World/Scenery" unique_id=234055787 instance=ExtResource("9_augu2")]
 transform = Transform3D(-0.15366639, 0, -0.47580105, 0, 0.5, 0, 0.47580105, 0, -0.15366639, -1.6, 0, 5.42)
 
-[node name="rocks-small" type="MeshInstance3D" parent="World/Scenery/rocks-small_18" unique_id=1559785322]
+[node name="rocks-small2" type="MeshInstance3D" parent="World/Scenery/rocks-small_18" unique_id=1559785322]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_6ry4b")
 
-[node name="rocks-small_19" type="Node3D" parent="World/Scenery" unique_id=1004963297 instance=ExtResource("9_augu2")]
+[node name="rocks-small_19" parent="World/Scenery" unique_id=1004963297 instance=ExtResource("9_augu2")]
 transform = Transform3D(-0.21203533, 0, 0.36254793, 0, 0.42, 0, -0.36254793, 0, -0.21203533, 5.42, 0, 1.2)
 
-[node name="rocks-small" type="MeshInstance3D" parent="World/Scenery/rocks-small_19" unique_id=1980491611]
+[node name="rocks-small2" type="MeshInstance3D" parent="World/Scenery/rocks-small_19" unique_id=1980491611]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_6ry4b")
 
-[node name="rocks-small_20" type="Node3D" parent="World/Scenery" unique_id=1217501531 instance=ExtResource("9_augu2")]
+[node name="rocks-small_20" parent="World/Scenery" unique_id=1217501531 instance=ExtResource("9_augu2")]
 transform = Transform3D(0.4585615, 0, 0.1418497, 0, 0.48, 0, -0.1418497, 0, 0.4585615, -5.42, 0, -0.6)
 
-[node name="rocks-small" type="MeshInstance3D" parent="World/Scenery/rocks-small_20" unique_id=750645019]
+[node name="rocks-small2" type="MeshInstance3D" parent="World/Scenery/rocks-small_20" unique_id=750645019]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_6ry4b")
 
-[node name="flag_21" type="Node3D" parent="World/Scenery" unique_id=1337361859 instance=ExtResource("12_t5ykj")]
+[node name="flag_21" parent="World/Scenery" unique_id=1337361859 instance=ExtResource("12_t5ykj")]
 transform = Transform3D(0.8253356, 0, 0.5646425, 0, 1, 0, -0.5646425, 0, 0.8253356, 0.95, 0, 0.95)
 
-[node name="flag" type="MeshInstance3D" parent="World/Scenery/flag_21" unique_id=1777044109]
+[node name="flag2" type="MeshInstance3D" parent="World/Scenery/flag_21" unique_id=1777044109]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_u442a")
 
-[node name="flag_22" type="Node3D" parent="World/Scenery" unique_id=298883536 instance=ExtResource("12_t5ykj")]
+[node name="flag_22" parent="World/Scenery" unique_id=298883536 instance=ExtResource("12_t5ykj")]
 transform = Transform3D(-0.68963563, 0, -0.65337795, 0, 0.95, 0, 0.65337795, 0, -0.68963563, -0.95, 0, -0.95)
 
-[node name="flag" type="MeshInstance3D" parent="World/Scenery/flag_22" unique_id=218576492]
+[node name="flag2" type="MeshInstance3D" parent="World/Scenery/flag_22" unique_id=218576492]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_u442a")
 
-[node name="tree-small_23" type="Node3D" parent="World/Scenery" unique_id=686038164 instance=ExtResource("7_dnhof")]
+[node name="tree-small_23" parent="World/Scenery" unique_id=686038164 instance=ExtResource("7_dnhof")]
 transform = Transform3D(-0.0321195, 0, 1.0995309, 0, 1.1, 0, -1.0995309, 0, -0.0321195, -10.75, -3.2, 4.75)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_23" unique_id=1339106557]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_23" unique_id=1339106557]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
-[node name="tree-large_24" type="Node3D" parent="World/Scenery" unique_id=574487138 instance=ExtResource("10_tm6hj")]
+[node name="tree-large_24" parent="World/Scenery" unique_id=574487138 instance=ExtResource("10_tm6hj")]
 transform = Transform3D(0.6967067, 0, 0.7173561, 0, 1, 0, -0.7173561, 0, 0.6967067, 10.4, -4.4, -1.4)
 
-[node name="tree-large" type="MeshInstance3D" parent="World/Scenery/tree-large_24" unique_id=1959114933]
+[node name="tree-large2" type="MeshInstance3D" parent="World/Scenery/tree-large_24" unique_id=1959114933]
 mesh = SubResource("ArrayMesh_5vy31")
 
-[node name="rocks-small_25" type="Node3D" parent="World/Scenery" unique_id=334634169 instance=ExtResource("9_augu2")]
+[node name="rocks-small_25" parent="World/Scenery" unique_id=334634169 instance=ExtResource("9_augu2")]
 transform = Transform3D(-0.7232577, 0, 0.3419039, 0, 0.8, 0, -0.3419039, 0, -0.7232577, 9.4, -4.4, -2.2)
 
-[node name="rocks-small" type="MeshInstance3D" parent="World/Scenery/rocks-small_25" unique_id=1046163872]
+[node name="rocks-small2" type="MeshInstance3D" parent="World/Scenery/rocks-small_25" unique_id=1046163872]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_6ry4b")
 
-[node name="tree-small_26" type="Node3D" parent="World/Scenery" unique_id=1957082909 instance=ExtResource("7_dnhof")]
+[node name="tree-small_26" parent="World/Scenery" unique_id=1957082909 instance=ExtResource("7_dnhof")]
 transform = Transform3D(0.3401799, 0, -0.83323324, 0, 0.9, 0, 0.83323324, 0, 0.3401799, -11.3, -6.4, -8.4)
 
-[node name="tree-small" type="MeshInstance3D" parent="World/Scenery/tree-small_26" unique_id=2144534362]
+[node name="tree-small2" type="MeshInstance3D" parent="World/Scenery/tree-small_26" unique_id=2144534362]
 cast_shadow = 0
 mesh = SubResource("ArrayMesh_2acte")
 
